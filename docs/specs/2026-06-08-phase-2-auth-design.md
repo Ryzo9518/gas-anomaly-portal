@@ -222,3 +222,28 @@ The site is presently serving the **older pre-built `dist`** via a small Node st
 - Stack additions are backend-only (FastAPI/Postgres) — no new front-end state lib/router/styling.
 - Deviations requiring a recorded decision: **(a)** `AuthPort` extension (§3.1), **(b)** login-view changes (§3.2). `authStore.ts` already anticipates (a).
 - All three quality gates run before any deploy; deploy follows the Hetzner runbook; commit messages use the repo format.
+
+---
+
+## 14. Provided configuration & answered decisions (2026-06-08)
+
+**Entra App registration "Gasecosys" (created in Jera's tenant):**
+
+| Item | Value |
+|------|-------|
+| Directory (tenant) ID | `4f124a4c-a71e-463c-a004-f65515cff124` |
+| Application (client) ID | `efcf0a9c-ddcf-411d-8139-124cc772895b` |
+| Object ID | `582a0baa-ddfb-4c43-bc07-609ccd344e8a` |
+| Supported accounts | **My organization only** (single-tenant) — correct: only Jera staff can use the staff OIDC door |
+| Platform / Redirect URI | **Web** → `https://anomaly.gasecosys.co.za/api/auth/microsoft/callback` ✅ matches §7 |
+| Client secret | **Delivered out-of-band — NOT stored in this repo.** Secret ID `a2e87a97-0b51-4777-bd36-5d94a5412e3a`, expires 2028-06-07. Lives only in `/etc/gas-portal/api.env` as `ENTRA_CLIENT_SECRET` (root-only, 0600). **Rotate before production** (was shared over chat). |
+
+**Answered decisions (refs §10):**
+1. **Allowed staff = invite-only allow-list**, not the whole tenant. Staff authenticate via Jera Entra OIDC, but only users explicitly invited into the portal (`users.role='staff'`) gain access — the backend checks the allow-list, not merely a valid Jera token.
+2. **Sender mailbox = `anomaly@jera.co.za`** (a Jera mailbox). gasecosys.co.za is cPanel-only with no Microsoft tenant, so **all** portal email originates from Jera's M365. The mailbox must exist (shared mailbox is fine) in Jera's tenant. Client magic-link emails will therefore arrive *from* `anomaly@jera.co.za` — expected and acceptable.
+3. **Invites:** staff invite both staff and clients ("we invite who we want"). A client is tied to their report at invite time. (Confirm one-vs-many reports per client at build time; default = one.)
+4. **TTLs:** defaults stand (magic link 15 min).
+
+**Still outstanding in Entra (do before staff/email work):**
+- **API permissions → Microsoft Graph → Application permission `Mail.Send` → Grant admin consent** (needed for sending magic-link emails). For staff OIDC, delegated `openid profile email User.Read` is sufficient and usually pre-consented.
+- Recommended: an **Application Access Policy** restricting the app's `Mail.Send` to only `anomaly@jera.co.za` (least privilege — otherwise the app can technically send as any mailbox in the tenant).
