@@ -1,8 +1,10 @@
 // ============================================================================
 // CLEAN FIXTURE — first-time client state.
 //
-// Loaded when VITE_FIXTURE=clean  (npm run dev:client).
-// This mode shows the portal as a brand-new client on their FIRST audit:
+// Consumed as the "newclient" entry in the client registry
+// (src/features/clients/clients.data.ts). Active in the internal build via
+// ?client=newclient, or as a scoped per-client build via VITE_CLIENT=newclient.
+// This shows the portal as a brand-new client on their FIRST audit:
 //   • ONE report  (the audit that was just run and delivered)
 //   • uploads: []  → Upload Centre shows intake mode automatically
 //   • SEED_ENGAGEMENTS: {}  → Engagement Builder is open, no prior carry-over
@@ -175,44 +177,3 @@ export function severeRisks(r: Record<Severity, number>): number {
   return r.critical + r.high;
 }
 
-/** The report immediately preceding `id`. Returns null — only one cycle. */
-export function priorReportOf(id: string): AuditReport | null {
-  const idx = REPORTS_DESC.findIndex((r) => r.id === id);
-  if (idx === -1) return null;
-  return REPORTS_DESC[idx + 1] ?? null; // always null: only one report exists
-}
-
-/** Cumulative across completed engagements. In clean mode: all zeros until the
- *  first engagement is submitted and completed. */
-export function computeCumulative(
-  engagementsById: Record<string, Engagement>,
-): CumulativeSummary {
-  const complete = Object.values(engagementsById).filter((e) => e.status === "complete");
-
-  let totalRecovered = 0;
-  let totalEstimated = 0;
-  let totalFindingsResolved = 0;
-  let totalFindingsRegressed = 0;
-
-  for (const e of complete) {
-    totalRecovered += e.actualSavings ?? 0;
-    totalEstimated += e.estimatedSavings;
-    for (const f of e.findings) {
-      if (f.status === "resolved") totalFindingsResolved += 1;
-      if (f.status === "regressed") totalFindingsRegressed += 1;
-    }
-  }
-
-  // With only one report, earliest === latest → healthGain = 0.
-  const earliest = REPORTS_DESC[REPORTS_DESC.length - 1];
-  const latest   = REPORTS_DESC[0];
-
-  return {
-    cyclesCompleted: complete.length,
-    totalRecovered,
-    totalEstimated,
-    totalFindingsResolved,
-    totalFindingsRegressed,
-    healthGain: latest.healthScore - earliest.healthScore,
-  };
-}

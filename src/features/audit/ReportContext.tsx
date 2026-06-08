@@ -1,13 +1,8 @@
 import * as React from "react";
 import { useSearchParams, useLocation } from "react-router-dom";
-import {
-  REPORTS,
-  REPORTS_DESC,
-  LATEST_REPORT_ID,
-  SEED_ENGAGEMENTS,
-  priorReportOf,
-  computeCumulative,
-} from "@/features/audit/fixture.active";
+import { useClient } from "@/features/clients/ClientContext";
+import { priorReportOf, computeCumulative } from "@/features/audit/report-helpers";
+import type { ClientInfo } from "@/features/clients/clients.data";
 import type {
   AuditReport,
   AuditUploadFile,
@@ -37,6 +32,7 @@ export interface SubmitEngagementInput {
 }
 
 interface ReportContextValue {
+  clientInfo: ClientInfo;          // name + healthTarget of the selected client
   reports: AuditReport[];          // newest first
   selectedReport: AuditReport;
   selectedReportId: string;
@@ -69,13 +65,25 @@ interface ReportContextValue {
 
 const ReportContext = React.createContext<ReportContextValue | null>(null);
 
-function isValidReport(id: string | null): id is string {
-  return !!id && REPORTS.some((r) => r.id === id);
-}
-
 export function ReportProvider({ children }: { children: React.ReactNode }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
+
+  // Report data for the SELECTED client (Providers remounts this provider on
+  // client change, so these are stable for the lifetime of one client view).
+  const {
+    reports: REPORTS,
+    reportsDesc: REPORTS_DESC,
+    latestReportId: LATEST_REPORT_ID,
+    seedEngagements: SEED_ENGAGEMENTS,
+    selectedClientId,
+    clientInfo,
+  } = useClient();
+
+  const isValidReport = React.useCallback(
+    (id: string | null): id is string => !!id && REPORTS.some((r) => r.id === id),
+    [REPORTS],
+  );
 
   // Engagements seeded from fixture; mutated in-session on submit/save.
   const [engagementsById, setEngagementsById] = React.useState<
@@ -194,8 +202,8 @@ export function ReportProvider({ children }: { children: React.ReactNode }) {
 
   // ── Derived ──────────────────────────────────────────────────────────────
   const priorReport = React.useMemo(
-    () => priorReportOf(selectedReportId),
-    [selectedReportId],
+    () => priorReportOf(REPORTS_DESC, selectedReportId),
+    [REPORTS_DESC, selectedReportId],
   );
 
   const priorEngagement = priorReport
@@ -203,18 +211,19 @@ export function ReportProvider({ children }: { children: React.ReactNode }) {
     : null;
 
   const cumulative = React.useMemo(
-    () => computeCumulative(engagementsById),
-    [engagementsById],
+    () => computeCumulative(REPORTS_DESC, engagementsById),
+    [REPORTS_DESC, engagementsById],
   );
 
-  const reportSearch = `?report=${selectedReportId}`;
+  const reportSearch = `?client=${selectedClientId}&report=${selectedReportId}`;
   const linkWithReport = React.useCallback(
     (path: string) =>
-      `${path}${path.includes("?") ? "&" : "?"}report=${selectedReportId}`,
-    [selectedReportId],
+      `${path}${path.includes("?") ? "&" : "?"}client=${selectedClientId}&report=${selectedReportId}`,
+    [selectedClientId, selectedReportId],
   );
 
   const value: ReportContextValue = {
+    clientInfo,
     reports: REPORTS_DESC,
     selectedReport,
     selectedReportId,

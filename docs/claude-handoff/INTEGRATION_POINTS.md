@@ -8,25 +8,35 @@ The architecture is built with an **adapter seam** so Phase 2 can wire a real ba
 
 ---
 
-## Fixture Modes (Demo vs Real Client)
+## Client data (registry — supersedes the old VITE_FIXTURE modes)
 
-Two fixture modes are available, controlled by the `VITE_FIXTURE` env var via `src/features/audit/fixture.active.ts`.
+> **Updated 2026-06-08.** The single build-time `VITE_FIXTURE` toggle has been
+> replaced by a **client registry** (`src/features/clients/clients.data.ts`).
+> Multiple clients now coexist in one build and are selected at runtime via
+> `?client=`. See `docs/specs/2026-06-08-multi-client-runtime-switcher-design.md`.
 
-| Mode | Command | Data |
-|------|---------|------|
-| `demo` (default) | `PORT=5199 npm run dev:demo` | 3-year history · Tourvest · R670K cumulative |
-| `clean` | `PORT=5199 npm run dev:client` | First-time client · no history · upload intake |
+Each client is a registry entry assembled from its own fixture module:
 
-**Demo mode** (`VITE_FIXTURE=demo` or unset): loads `reports.fixture.ts`. Three audit cycles, full YoY comparison, R670K cumulative. Use for sales demos.
+| Client | Source fixture | Data |
+|--------|----------------|------|
+| `tourvest` (default) | `reports.fixture.ts` | 3-year history · Tourvest · R670K cumulative |
+| `newclient` | `reports.fixture.clean.ts` | First-time client · no history · upload intake |
 
-**Client mode** (`VITE_FIXTURE=clean`): loads `reports.fixture.clean.ts`. One report, `uploads: []`, `SEED_ENGAGEMENTS = {}`. The upload screen automatically shows intake mode (ScriptDownloadCard → ZipDropZone). No YoY card. Cumulative shows zeros. Use when setting up the portal for a real client's first audit.
+- **Internal build** (`npm run dev` / `npm run build`, `VITE_CLIENT` unset): all
+  clients, with the sidebar client switcher. Select via `?client=<id>`.
+- **Scoped per-client build** (`VITE_CLIENT=<id>`): only that client's data is
+  bundled (others are tree-shaken out — verified by `npm run verify:isolation`),
+  switcher hidden. Use for a build sent to a single client.
 
-**Before running in client mode**, update `src/features/audit/reports.fixture.clean.ts`:
+**Before going live for a real client**, update its fixture (e.g.
+`reports.fixture.clean.ts` for `newclient`):
 1. `CLIENT_INFO.name` → real client name
 2. Report `healthScore`, `leakageEstimate`, `leakageRecoverable`, `risks` → real audit output
 3. `FINDINGS_CURRENT` array → actual findings from the audit
 
-**Rule:** `ReportContext.tsx` imports from `fixture.active` — never import directly from `reports.fixture` or `reports.fixture.clean` in any route or component.
+**Rule:** `ReportContext` reads the active client from `ClientContext`
+(`useClient()`); routes/components read report data from `useReport()` and never
+import `reports.fixture*` data directly.
 
 ---
 

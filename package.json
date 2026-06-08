@@ -5,11 +5,15 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:demo": "vite --mode demo",
-    "dev:client": "vite --mode client",
+    "dev:internal": "vite",
+    "dev:newclient": "VITE_CLIENT=newclient vite",
     "build": "vite build",
+    "build:internal": "vite build",
+    "build:tourvest": "VITE_CLIENT=tourvest vite build --outDir dist-tourvest",
+    "build:newclient": "VITE_CLIENT=newclient vite build --outDir dist-newclient",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "verify:isolation": "./scripts/verify-client-isolation.sh newclient \"Tourvest Travel Group\" \"Tourvest\""
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.2",

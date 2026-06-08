@@ -4,7 +4,6 @@ import {
   Search, Bell, BellOff, Info, Menu, ArrowLeft, ChevronRight,
   ChevronDown, Check, History,
 } from "lucide-react";
-import { CLIENT_INFO } from "@/features/audit/audit.fixture";
 import { useReport } from "@/features/audit/ReportContext";
 import type { EngagementStatus } from "@/features/audit/reports.fixture";
 import { useUIStore } from "@/state/uiStore";
