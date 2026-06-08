@@ -178,15 +178,16 @@ URL access; client resolves before report).
 A client's scoped bundle contains only their data, so the *gate* in front only
 needs to stop casual access to *that client's own* portal until real auth lands.
 
-**Interim gate options before the Phase 2 backend is live** (pick by timeline;
-both preserve the §4.2 isolation guarantee):
+**Interim gate — DECISION (2026-06-08): Caddy basic-auth.** Both options below
+preserve the §4.2 isolation guarantee; option (a) is chosen, (b) is not pursued.
 
-- **(a) Caddy basic-auth** in front of each per-client scoped build — zero app
-  code; this is what the live interim site already uses (auth spec §12). Simplest
-  bridge: send the client their private link + basic-auth credentials.
-- **(b) Front-end passcode** via `auth.mock` (`VITE_CLIENT_PASSCODE`) — only if
-  the gate must live inside the app. Throwaway, and it must **not** rework
-  `LoginCard` (the auth spec owns that). Lower priority than (a).
+- **(a) Caddy basic-auth [CHOSEN]** in front of each per-client scoped build —
+  zero app code; this is what the live interim site already uses (auth spec §12).
+  Send the client their private link + basic-auth credentials. Replaced by JP's
+  real magic-link auth when it lands. **No front-end auth code ships this week.**
+- **(b) Front-end passcode** via `auth.mock` (`VITE_CLIENT_PASSCODE`) — *not
+  pursued.* Recorded only as the rejected alternative (would be throwaway once
+  real auth lands, and must never rework `LoginCard`, which the auth spec owns).
 
 **When Phase 2 auth lands:** remove the interim gate; the same per-client
 deployment is protected by real magic-link auth scoped via `client_reports`
