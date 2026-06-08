@@ -1,0 +1,14 @@
+# Add this INSIDE the existing `anomaly.gasecosys.co.za { ... }` Caddy block,
+# BEFORE the static file_server. Everything not under /api stays a static SPA.
+#
+# The FastAPI staff-SSO backend listens on 127.0.0.1:8001 (8000 is taken by the
+# intacct-toolkit service on this box).
+
+handle /api/* {
+    reverse_proxy 127.0.0.1:8001
+}
+
+# NOTE on the interim password gate:
+# While rolling out, keep the existing `basicauth` block. Once Microsoft SSO is
+# verified working for all four staff (plan Task 9), REMOVE the basicauth block
+# so the app's own Microsoft login is the only door, then reload Caddy.
