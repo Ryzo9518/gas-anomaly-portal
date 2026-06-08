@@ -264,19 +264,24 @@ export function LoginCard() {
 
       {/* Staff door — Microsoft 365 SSO. The primary (and, in the live bff
           build, only) sign-in path for Jera staff. */}
-      <button
-        type="button"
-        onClick={() => auth.startMicrosoftLogin()}
-        className="mt-5 flex w-full items-center justify-center gap-2.5 rounded-xl bg-white/95 px-4 py-3 text-[14px] font-semibold text-slate-800 transition-colors hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
-      >
-        <span aria-hidden className="grid h-4 w-4 grid-cols-2 gap-px">
-          <span style={{ background: "#f25022" }} />
-          <span style={{ background: "#7fba00" }} />
-          <span style={{ background: "#00a4ef" }} />
-          <span style={{ background: "#ffb900" }} />
-        </span>
-        Sign in with Microsoft
-      </button>
+      {/* Only the live staff (bff) build shows the Microsoft button. Client
+          passcode builds run on the mock adapter where it is a no-op, so it is
+          hidden there and the passcode form below is the only door. */}
+      {CURRENT_ADAPTER === "bff" && (
+        <button
+          type="button"
+          onClick={() => auth.startMicrosoftLogin()}
+          className="mt-5 flex w-full items-center justify-center gap-2.5 rounded-xl bg-white/95 px-4 py-3 text-[14px] font-semibold text-slate-800 transition-colors hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
+        >
+          <span aria-hidden className="grid h-4 w-4 grid-cols-2 gap-px">
+            <span style={{ background: "#f25022" }} />
+            <span style={{ background: "#7fba00" }} />
+            <span style={{ background: "#00a4ef" }} />
+            <span style={{ background: "#ffb900" }} />
+          </span>
+          Sign in with Microsoft
+        </button>
+      )}
 
       {/* Email/password door — local mock/dev only. Hidden in the live bff
           build, where staff authenticate via Microsoft above. */}
