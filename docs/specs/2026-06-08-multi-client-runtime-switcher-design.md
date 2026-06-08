@@ -1,7 +1,7 @@
 # Design Spec: Multi-Client Portal — Internal Switcher + Scoped Per-Client Logins
 
 **Date:** 2026-06-08
-**Status:** Approved (design, rev 2) — pending implementation plan
+**Status:** Implemented (data layer) — auth per the Phase 2 spec. See `docs/plans/2026-06-08-multi-client-data-layer.md`. Open item: the static `public/mock-report/clientA_audit_2026Q1.html` is a shared placeholder shown in the Report viewer and must be handled per-client before a real client link is sent (flagged by `npm run verify:isolation`).
 **Applies to:** GAS Anomaly Portal (`anomaly.gasecosys.co.za`)
 **Governs / governed by:** `AGENTS.md` (the law). Upholds all existing
 invariants in `docs/claude-handoff/`.

@@ -1,8 +1,10 @@
 // ============================================================================
 // CLEAN FIXTURE — first-time client state.
 //
-// Loaded when VITE_FIXTURE=clean  (npm run dev:client).
-// This mode shows the portal as a brand-new client on their FIRST audit:
+// Consumed as the "newclient" entry in the client registry
+// (src/features/clients/clients.data.ts). Active in the internal build via
+// ?client=newclient, or as a scoped per-client build via VITE_CLIENT=newclient.
+// This shows the portal as a brand-new client on their FIRST audit:
 //   • ONE report  (the audit that was just run and delivered)
 //   • uploads: []  → Upload Centre shows intake mode automatically
 //   • SEED_ENGAGEMENTS: {}  → Engagement Builder is open, no prior carry-over

@@ -53,20 +53,28 @@ single-page app served by nginx over HTTPS.
 
 ---
 
-## 3. Choose the fixture mode (REQUIRED, recorded decision)
+## 3. Choose the build scope (REQUIRED, recorded decision)
 
-The portal ships with two fixture modes. The live site must pick one deliberately:
+The portal builds in two scopes (client data lives in a registry — the old
+`VITE_FIXTURE` toggle is retired). Each deployment must pick one deliberately:
 
-| Mode | Build command | What it shows | Use when |
-|------|---------------|---------------|----------|
-| `demo` (default) | `npm run build` | 3-year history, Tourvest seed, R670K cumulative | Sales-demo / showcase site |
-| `clean` | `VITE_FIXTURE=clean npm run build` | First-time client, no history, upload intake | A real client's first live audit |
+| Scope | Build command | What it ships | Use when |
+|-------|---------------|---------------|----------|
+| internal (all clients) | `npm run build` (`VITE_CLIENT` unset) | every client + the sidebar switcher | internal demos; behind the internal gate |
+| per-client (scoped) | `VITE_CLIENT=<id> npm run build` (e.g. `build:newclient`) | ONLY that client's data; no switcher | a build sent to a single external client |
 
-For `clean` mode, first update `src/features/audit/reports.fixture.clean.ts`
-(`CLIENT_INFO.name`, health score, leakage figures, `FINDINGS_CURRENT`) on a
-branch, get it reviewed, and merge to `main` — never edit fixtures on the server.
+A scoped build must pass isolation before publish: `npm run verify:isolation`
+asserts the JS bundle contains no other client's data. **Note:** the static
+`public/mock-report/clientA_audit_2026Q1.html` placeholder is shared across
+builds and must be replaced/removed per-client before sending a real client link
+(the verifier flags it).
 
-**Record the chosen mode in the deploy log (§6).**
+For a new real client, first update its fixture (e.g.
+`reports.fixture.clean.ts` for `newclient`: `CLIENT_INFO.name`, health score,
+leakage figures, `FINDINGS_CURRENT`) on a branch, get it reviewed, and merge to
+`main` — never edit fixtures on the server.
+
+**Record the chosen scope (`VITE_CLIENT` value) in the deploy log (§6).**
 
 ---
 
@@ -83,7 +91,7 @@ git rev-parse HEAD          # <-- record this SHA for the deploy log
 
 npm ci                      # reproducible install from package-lock.json
 npm run typecheck           # Gate 1 — must be 0 errors
-npm run build               # Gate 2 — must succeed   (or: VITE_FIXTURE=clean npm run build)
+npm run build               # Gate 2 — must succeed   (or: VITE_CLIENT=<id> npm run build for a scoped build)
 # Gate 3 (manual visual check) — run once before first promotion:
 #   PORT=5199 npm run preview   and verify the QUALITY_GATES.md regression checklist
 ```

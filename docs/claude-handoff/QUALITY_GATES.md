@@ -66,6 +66,14 @@ After any change, verify these do NOT break:
 - [ ] **Upload Centre — archive:** Navigate to /upload on 2026 → see archive view (5 file cards, OutcomeBand)
 - [ ] **Upload Centre — intake:** Click "Run new audit" → URL gains `&mode=new` → TopBar shows "2027 New" → CycleLockBanner visible → ScriptDownloadCard is Step 1
 
+### Multi-client checks (added 2026-06-08)
+
+- [ ] **Client switch (internal build):** sidebar switcher changes client → every screen rehydrates; figures never bleed between clients
+- [ ] **Client isolation (scoped build):** `npm run verify:isolation` → `ISOLATION PASSED (bundle)` (the JS bundle must not contain another client's data)
+- [ ] **Client deep link:** `#/dashboard?client=newclient&report=<id>` loads the right client; refresh keeps it
+- [ ] **Missing param self-heal:** `#/findings` (no params) → rewrites to a valid `?client=&report=` with no flash
+- [ ] **Single-client build:** a scoped build shows a static client label, not an interactive switcher
+
 ---
 
 ## Code Review Dimensions
