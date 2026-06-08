@@ -20,4 +20,7 @@ export interface AuthPort {
   getSession(): Promise<Session | null>;
   signIn(credentials: SignInCredentials): Promise<Session>;
   signOut(): Promise<void>;
+  // Staff door — full-page redirect to the backend OIDC start endpoint
+  // ("Sign in with Microsoft"). No-op under the mock adapter.
+  startMicrosoftLogin(): void;
 }

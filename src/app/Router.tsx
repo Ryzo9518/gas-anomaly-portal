@@ -5,6 +5,7 @@ import { useAuthStore } from "@/state/authStore";
 
 import { DashboardRoute } from "@/routes/dashboard.route";
 import { LoginRoute } from "@/routes/login.route";
+import { AuthCallbackRoute } from "@/routes/authCallback.route";
 import { UploadRoute } from "@/routes/upload.route";
 import { ReportRoute } from "@/routes/report.route";
 import { FindingsRoute } from "@/routes/findings.route";
@@ -27,6 +28,7 @@ export function Router() {
   return (
     <Routes>
       <Route path="/login" element={<LoginRoute />} />
+      <Route path="/auth/callback" element={<AuthCallbackRoute />} />
       <Route element={<RequireAuth />}>
         <Route element={<AppLayout />}>
           <Route index element={<Navigate to="/dashboard" replace />} />

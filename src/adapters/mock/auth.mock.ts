@@ -26,4 +26,9 @@ export const authMock: AuthPort = {
   async signOut() {
     await delay();
   },
+  startMicrosoftLogin() {
+    // Mock/dev: no real identity provider. Open-session mode is reached via
+    // signIn() (the email/password form), so this is a no-op.
+    console.warn("startMicrosoftLogin() is a no-op under the mock adapter");
+  },
 };

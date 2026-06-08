@@ -20,12 +20,15 @@ export default defineConfig({
     host: "0.0.0.0",
     port: Number(process.env.PORT) || 5174,
     allowedHosts: true,
-    // proxy: {
-    //   "/api/": {
-    //     target: "http://localhost:8000",
-    //     changeOrigin: true,
-    //   },
-    // },
+    // Forwards /api/* to the local FastAPI backend (staff SSO) in dev. The
+    // backend listens on 8001 (8000 is the intacct-toolkit on the box). Only
+    // used when running with VITE_ADAPTER=bff against a local backend.
+    proxy: {
+      "/api/": {
+        target: "http://127.0.0.1:8001",
+        changeOrigin: true,
+      },
+    },
   },
   plugins: [react()],
   resolve: {

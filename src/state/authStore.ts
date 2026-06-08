@@ -51,6 +51,9 @@ interface AuthState {
   signIn: (credentials: SignInCredentials) => Promise<void>;
   signOut: () => Promise<void>;
   clearSession: () => void;
+  // Restore the session on app boot / after the OIDC callback by reading the
+  // current session from the adapter (the backend cookie in bff mode).
+  hydrate: () => Promise<void>;
   // Called by the bff adapter once /api/auth/magic-link returns a JWT
   // envelope. Under the mock adapter it is never called.
   setSession: (next: SessionPatch) => void;
@@ -77,6 +80,16 @@ export const useAuthStore = create<AuthState>((set) => ({
       actor: actorFromSession(session),
       isOpenSession: !!session.isOpenSession,
     });
+  },
+
+  async hydrate() {
+    const session = await auth.getSession();
+    if (session) {
+      set({
+        actor: actorFromSession(session),
+        isOpenSession: !!session.isOpenSession,
+      });
+    }
   },
 
   async signOut() {

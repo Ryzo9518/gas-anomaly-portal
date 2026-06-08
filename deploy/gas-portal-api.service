@@ -1,0 +1,15 @@
+[Unit]
+Description=GAS Portal API (FastAPI staff SSO)
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/gas-portal/backend
+EnvironmentFile=/etc/gas-portal/api.env
+ExecStart=/opt/gas-portal/backend/.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8001
+Restart=on-failure
+RestartSec=3
+User=www-data
+
+[Install]
+WantedBy=multi-user.target
