@@ -30,8 +30,10 @@ behind a single seam, with no view-layer rework.
 - Internal all-clients build with a sidebar **client switcher**.
 - **Build-time client scoping** so a per-client build bundles only that client's
   data (other clients' data is eliminated from the bundle, not merely hidden).
-- A **passcode gate** on per-client (and internal) builds, via the existing
-  mocked-auth seam and the existing `/login` screen.
+- An **interim access gate** on per-client (and internal) builds — Caddy
+  basic-auth (preferred) or a throwaway front-end passcode. Real authentication
+  is owned by the Phase 2 auth spec (staff SSO + client magic link); this spec
+  only guarantees the underlying data isolation (§4.8).
 - Multiple deployment artifacts (one internal + one per external client).
 
 **Phase 2 (seam designed, NOT built this week)**
@@ -161,28 +163,35 @@ URL access; client resolves before report).
 - Rendered only when `clients.length > 1` (i.e. the internal build). In a scoped
   per-client build it renders the client name as a static label, never a switcher.
 
-### 4.8 Passcode gate (the existing login screen becomes the real gate)
+### 4.8 Client access gating — defers to the Phase 2 auth spec
 
-The current `/login` screen (email + password fields, `LoginCard.tsx`) is
-**kept and reused** — it is not replaced or bypassed. Today its mock `signIn`
-ignores input and opens a session; we make it actually enforce a passcode.
+> **The canonical authentication design is
+> [`2026-06-08-phase-2-auth-design.md`](./2026-06-08-phase-2-auth-design.md)**
+> (staff Microsoft 365 SSO + client magic link, FastAPI backend). This
+> multi-client work is **auth-agnostic**: it supplies the per-client *data
+> isolation* (scoped builds, §4.2) and the client/report *structure* (registry,
+> §4.2–4.4). **How a user proves identity is owned by the auth spec**, including
+> any `LoginCard` rework (that spec §3.2). This section does **not** prescribe a
+> competing login change.
 
-- **Client-facing scoped build:** the client's email is **pre-filled and locked**
-  on the login screen (per-build via **`VITE_CLIENT_EMAIL`**, or derived from the
-  client entry); the client types only the **passcode** (sent with their private
-  link). `auth.mock.ts` `signIn` validates the password field against
-  **`VITE_CLIENT_PASSCODE`**; wrong passcode → no session, no data shown. The
-  screen looks unchanged; only the email is pre-populated.
-- **Internal all-clients build:** also gated (an internal passcode via the same
-  mechanism), since it holds every client's data — never openly reachable. Email
-  may be a known internal address; open-session is used only for local dev.
-- On success `authStore` holds the session and the app renders. A small route
-  guard sends unauthenticated users to `/login`. The infra (`/login`,
-  `LoginCard`, `authStore`, `AuthPort`) already exists; we add the guard, the
-  passcode check, and the per-build email pre-fill.
-- Phase 2 swaps `auth.mock` for the real `AuthPort` backend adapter (email +
-  password / magic-link) with no screen or seam changes — the same login UI then
-  authenticates real accounts.
+**Real protection = data isolation by build (§4.2), independent of the gate.**
+A client's scoped bundle contains only their data, so the *gate* in front only
+needs to stop casual access to *that client's own* portal until real auth lands.
+
+**Interim gate options before the Phase 2 backend is live** (pick by timeline;
+both preserve the §4.2 isolation guarantee):
+
+- **(a) Caddy basic-auth** in front of each per-client scoped build — zero app
+  code; this is what the live interim site already uses (auth spec §12). Simplest
+  bridge: send the client their private link + basic-auth credentials.
+- **(b) Front-end passcode** via `auth.mock` (`VITE_CLIENT_PASSCODE`) — only if
+  the gate must live inside the app. Throwaway, and it must **not** rework
+  `LoginCard` (the auth spec owns that). Lower priority than (a).
+
+**When Phase 2 auth lands:** remove the interim gate; the same per-client
+deployment is protected by real magic-link auth scoped via `client_reports`
+(auth spec §6). The registry / `ClientContext` stay; `ClientsPort` swaps to the
+`bff` adapter. No view rework from the multi-client side.
 
 ### 4.9 Retiring VITE_FIXTURE
 
@@ -264,8 +273,7 @@ All three standing gates pass (`typecheck`, `build`, manual at `:5199`), plus:
 - `src/features/audit/ReportContext.tsx` — consume `useClient()` not `fixture.active`
 - `src/app/Providers.tsx` — add `ClientProvider` inside `HashRouter`
 - `src/adapters/index.ts` — add `export const clients`
-- `src/adapters/mock/auth.mock.ts` — passcode check via `VITE_CLIENT_PASSCODE`
-- `src/features/login/LoginCard.tsx` — pre-fill + lock email via `VITE_CLIENT_EMAIL`
+- `src/adapters/mock/auth.mock.ts` — *(interim option b only)* passcode check via `VITE_CLIENT_PASSCODE`. `LoginCard` is NOT reworked here — the auth spec owns login-view changes.
 - `src/shell/Sidebar.tsx` — mount `ClientSwitcher`
 - `src/features/audit/reports.fixture.clean.ts` — becomes the `newClient` source
 
