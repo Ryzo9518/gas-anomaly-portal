@@ -15,7 +15,7 @@ import { StatTile } from "@/ui/StatTile";
 import { PageStickyHeader } from "@/shell/PageStickyHeader";
 import { useScrollCompact } from "@/lib/useScrollCompact";
 import { useReport } from "@/features/audit/ReportContext";
-import { CLIENT_INFO, totalRisks, severeRisks } from "@/features/audit/audit.fixture";
+import { totalRisks, severeRisks } from "@/features/audit/report-helpers";
 
 // ── Formatting helpers ──────────────────────────────────────────────────
 
@@ -67,7 +67,7 @@ const ENG_PILL: Record<string, { label: string; cls: string }> = {
 
 export function DashboardRoute() {
   const navigate = useNavigate();
-  const { selectedReport: cur, priorReport: prior, isBaseline, isHistorical, engagement, cumulative, linkWithReport } =
+  const { selectedReport: cur, priorReport: prior, isBaseline, isHistorical, engagement, cumulative, linkWithReport, clientInfo } =
     useReport();
 
   const compact = useScrollCompact();
@@ -110,7 +110,7 @@ export function DashboardRoute() {
             <div className="max-w-2xl">
               <h1 className="text-display text-slate-900">Audit Dashboard</h1>
               <p className="text-body text-slate-500 mt-0.5">
-                {cur.cycleLabel} &middot; Completed {formatDate(cur.completedAt)} &middot; {CLIENT_INFO.name}
+                {cur.cycleLabel} &middot; Completed {formatDate(cur.completedAt)} &middot; {clientInfo.name}
               </p>
             </div>
             <div className="flex items-center gap-2 shrink-0">
@@ -133,7 +133,7 @@ export function DashboardRoute() {
               value={cur.healthScore}
               delta={prior ? (scoreDelta >= 0 ? `+${scoreDelta} vs ${prior.shortLabel}` : `${scoreDelta} vs ${prior.shortLabel}`) : "Baseline"}
               trend={prior ? (scoreDelta > 0 ? "up" : scoreDelta < 0 ? "down" : "flat") : "flat"}
-              sublabel={`Target ${CLIENT_INFO.healthTarget}`}
+              sublabel={`Target ${clientInfo.healthTarget}`}
               icon={<TrendingUp className="h-4 w-4" />}
               status="healthy"
             />
@@ -251,7 +251,7 @@ export function DashboardRoute() {
                     {cur.healthScore}
                   </span>
                 </div>
-                <div className="mt-2 text-[11px] text-violet-400/60">+{scoreDelta} pts &middot; Target {CLIENT_INFO.healthTarget}</div>
+                <div className="mt-2 text-[11px] text-violet-400/60">+{scoreDelta} pts &middot; Target {clientInfo.healthTarget}</div>
                 <div className="mt-2.5">
                   <span className="inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[9.5px] font-semibold bg-emerald-900/60 text-emerald-300 ring-1 ring-emerald-500/30">
                     <TrendingUp className="h-2.5 w-2.5" aria-hidden="true" /> +{scoreDelta} pts
@@ -309,7 +309,7 @@ export function DashboardRoute() {
               <div>
                 <div className="text-[10px] font-semibold text-violet-400/70 uppercase tracking-[0.1em] mb-2.5">Health score</div>
                 <div className="font-display text-[32px] text-white tracking-tighter tabular-nums leading-none">{cur.healthScore}</div>
-                <div className="mt-2 text-[11px] text-violet-400/60">Target {CLIENT_INFO.healthTarget}</div>
+                <div className="mt-2 text-[11px] text-violet-400/60">Target {clientInfo.healthTarget}</div>
               </div>
               <div>
                 <div className="text-[10px] font-semibold text-violet-400/70 uppercase tracking-[0.1em] mb-2.5">Severe risks</div>
