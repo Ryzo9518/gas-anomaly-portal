@@ -15,9 +15,13 @@ single-page app served by nginx over HTTPS.
 
 - The app is a Vite build with `base: "./"` (relative asset paths) — it serves
   correctly from any host or path.
-- It is **client-side routed** (React Router 6). The server must return
-  `index.html` for any unknown path, or deep links and refreshes will 404.
-  This mirrors the old `dist/server.js` SPA fallback behaviour.
+- It is **client-side routed** (React Router 6 via **HashRouter**). Routes live
+  after a `#` (e.g. `index.html#/dashboard?report=2026`), so the server only ever
+  receives `/` and deep links do **not** 404 on their own. The
+  `try_files ... /index.html` rule below is retained as a safe best-practice net
+  (and to serve hashed asset paths); it is not load-bearing for client-side
+  routes while HashRouter is in use. If the app is ever switched to BrowserRouter,
+  the fallback becomes load-bearing — keep it.
 - Phase 1 makes **no backend calls** — there is nothing to proxy yet. When the
   Phase 2 FastAPI backend lands, add an `/api/` proxy block (see §7); the
   static-serving rules below do not change.
