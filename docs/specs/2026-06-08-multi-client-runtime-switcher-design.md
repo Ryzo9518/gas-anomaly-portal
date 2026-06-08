@@ -1,52 +1,67 @@
-# Design Spec: Multi-Client Runtime Switcher
+# Design Spec: Multi-Client Portal — Internal Switcher + Scoped Per-Client Logins
 
 **Date:** 2026-06-08
-**Status:** Approved (design) — pending implementation plan
+**Status:** Approved (design, rev 2) — pending implementation plan
 **Applies to:** GAS Anomaly Portal (`anomaly.gasecosys.co.za`)
-**Governs / governed by:** `AGENTS.md` (the law). This feature must uphold all
-existing invariants in `docs/claude-handoff/`.
+**Governs / governed by:** `AGENTS.md` (the law). Upholds all existing
+invariants in `docs/claude-handoff/`.
 
 ---
 
 ## 1. Goal
 
-Let the portal hold **multiple clients at once** and switch between them at
-runtime in the browser, instead of baking a single client in at build time.
+Two outcomes from one codebase:
 
-This week: **Tourvest** (the existing demo data) and one **New Client** (the
-`reports.fixture.clean.ts` scaffold, populated by ops), both live in one build,
-switchable during a demo. Adding further clients = adding one data entry.
+1. **Internal multi-client switcher** — you/Jera see all clients and switch
+   between them in-browser during a demo (`?client=tourvest&report=2026`).
+2. **Scoped per-client logins you can send out this week** — each external
+   client gets a **private link + passcode** to a build that contains **only
+   their own data**, so one client can never see another's audit information.
 
-Built so that **per-client logins** and an eventual **self-serve backend** slot
-in later behind a single seam, with no view-layer or route rework.
+This week: **Tourvest** + one **New Client** (the `reports.fixture.clean.ts`
+scaffold, populated by ops). Adding more clients = adding one data entry.
+Designed so a real backend with proper accounts replaces the passcode gate later
+behind a single seam, with no view-layer rework.
 
-## 2. Non-goals (scope guard — NOT built this week)
+## 2. Scope
 
-- Real per-client authentication / passwords / magic-link login (Phase 2).
-- The FastAPI backend or any live API (Phase 2).
-- An admin "create a client" UI / self-serve onboarding (Phase 2).
-- Any change to the audit/report/finding/engagement data shapes or the 10
+**In scope this week**
+- Client registry + `ClientContext` (client layer above reports).
+- Internal all-clients build with a sidebar **client switcher**.
+- **Build-time client scoping** so a per-client build bundles only that client's
+  data (other clients' data is eliminated from the bundle, not merely hidden).
+- A **passcode gate** on per-client (and internal) builds, via the existing
+  mocked-auth seam and the existing `/login` screen.
+- Multiple deployment artifacts (one internal + one per external client).
+
+**Phase 2 (seam designed, NOT built this week)**
+- Real backend (FastAPI) and real accounts / magic-link / password auth.
+- Server-side per-client data scoping (replaces build-time scoping).
+- Self-serve client/audit creation (admin UI).
+
+**Explicit non-goals**
+- No change to the audit/report/finding/engagement data shapes or the 10
   report-scoped invariants.
+- The passcode is a **gate, not a vault** (see §6). It is not bank-grade and is
+  not represented as such.
 
-The seam for the above is **designed** here, not implemented.
+## 3. Current state (today)
 
-## 3. Current state (what exists today)
-
-- One client is selected at **build time** via `VITE_FIXTURE` in
+- One client is chosen at **build time** via `VITE_FIXTURE` in
   `src/features/audit/fixture.active.ts`, which re-exports `CLIENT_INFO`,
-  `REPORTS`, `REPORTS_DESC`, `LATEST_REPORT_ID`, `SEED_ENGAGEMENTS`, and helpers
-  from either `reports.fixture.ts` (demo/Tourvest) or `reports.fixture.clean.ts`
-  (new client).
-- `ReportContext` (`src/features/audit/ReportContext.tsx`) imports from
-  `fixture.active` and is the single source of truth for the selected report,
-  driven by the `?report=` URL param.
-- Routing uses **`HashRouter`** (`src/app/Providers.tsx`); `ReportProvider` sits
-  inside it. URLs are hash-based, e.g. `index.html#/dashboard?report=2026`.
-- Auth already uses a clean port/adapter seam: `AuthPort`
-  (`src/ports/auth.port.ts`) → `adapters/index.ts` (`export const auth`) →
-  `adapters/mock/auth.mock.ts`. **We mirror this exact pattern for clients.**
+  `REPORTS`, `REPORTS_DESC`, `LATEST_REPORT_ID`, `SEED_ENGAGEMENTS`, helpers from
+  `reports.fixture.ts` (demo/Tourvest) or `reports.fixture.clean.ts` (new client).
+  **It already relies on Vite build-time dead-code elimination** to drop the
+  unused fixture — this is the exact mechanism we extend for per-client scoping.
+- `ReportContext` is the single source of truth for the selected report, driven
+  by `?report=`. Routing is **HashRouter** (`src/app/Providers.tsx`); URLs are
+  hash-based (`index.html#/dashboard?report=2026`).
+- Auth uses a clean seam: `AuthPort` → `adapters/index.ts` (`export const auth`)
+  → `adapters/mock/auth.mock.ts` (open session today). The `/login` screen,
+  `authStore`, and adapter seam all exist. **We extend the mock to check a
+  passcode; we reuse the existing login UI.**
 
-## 4. Target architecture
+## 4. Architecture
 
 ### 4.1 Hierarchy and URL scheme
 
@@ -55,17 +70,12 @@ Client  ──>  Report  ──>  Engagement
 (new)        (exists)     (exists)
 ```
 
-URL carries both selections (within the hash, per HashRouter):
+URL (within the hash): `index.html#/dashboard?client=tourvest&report=2026`.
+`client` selects the dataset; `report` selects within it. Both shareable;
+missing params self-heal (4.4). In a per-client build there is exactly one
+client, so `?client=` is fixed to it.
 
-```
-index.html#/dashboard?client=tourvest&report=2026
-```
-
-`client` is resolved first and selects the dataset; `report` then selects within
-that client, exactly as today. Both are shareable/bookmarkable. Missing params
-self-heal (see 4.4).
-
-### 4.2 Client registry (the data)
+### 4.2 Client registry + build-time scoping
 
 New module `src/features/clients/clients.data.ts`:
 
@@ -75,23 +85,23 @@ export interface ClientInfo { name: string; healthTarget: number; }
 export interface ClientEntry {
   id: string;                               // URL slug, e.g. "tourvest"
   info: ClientInfo;
-  reports: AuditReport[];                   // newest-first, same shape as today
+  reports: AuditReport[];                   // same shape as today, newest-first
   seedEngagements: Record<string, Engagement>;
 }
 
-// Lightweight shape for the switcher list (no report payload).
-export interface ClientSummary { id: string; name: string; }
-
-export const CLIENTS: ClientEntry[] = [ tourvest, newClient ];
-export const DEFAULT_CLIENT_ID = "tourvest";
+export interface ClientSummary { id: string; name: string; }  // for the switcher
 ```
 
-- `tourvest` entry sources its data from the existing `reports.fixture.ts`.
-- `newClient` entry sources its data from `reports.fixture.clean.ts`.
-- The two `reports.fixture*.ts` files keep their data and types; the registry
-  imports and bundles them. (We do not rewrite the per-client data; we wrap it.)
-- Adding a client this week = add an entry referencing a new
-  `reports.fixture.<client>.ts`. Later = the backend returns these.
+- Each client's data lives in its own `reports.fixture.<client>.ts` (Tourvest =
+  today's `reports.fixture.ts`; New Client = `reports.fixture.clean.ts`).
+- The registry assembles `CLIENTS` based on a build-time env var
+  **`VITE_CLIENT`**, written so unselected clients are **tree-shaken out** of a
+  per-client production build (same technique `fixture.active.ts` documents
+  today):
+  - `VITE_CLIENT` unset / `all` → internal build: `CLIENTS = [tourvest, newClient, …]`, switcher shown.
+  - `VITE_CLIENT=<id>` → scoped build: `CLIENTS = [<that client only>]`, switcher hidden, other clients' data absent from the bundle.
+- **Isolation is verified, not assumed** (see §7): the per-client `dist` bundle
+  is grepped for other clients' identifying strings and must contain none.
 
 ### 4.3 ClientsPort (the Phase-2 seam)
 
@@ -99,137 +109,153 @@ New `src/ports/clients.port.ts`, mirroring `AuthPort`:
 
 ```typescript
 export interface ClientsPort {
-  listClients(): Promise<ClientSummary[]>;        // id + name (for the switcher)
+  listClients(): Promise<ClientSummary[]>;
   getClient(id: string): Promise<ClientEntry | null>;
 }
 ```
 
-- Phase 1 mock: `src/adapters/mock/clients.mock.ts` reads `CLIENTS` from the
-  registry.
-- Wired through `src/adapters/index.ts` as `export const clients: ClientsPort`.
-- Phase 2: a `bff/clients.bff.ts` calls `GET /api/clients` and
-  `GET /api/clients/:id`, **scoped to the logged-in identity** — an admin/Jera
-  identity receives all clients; a client identity receives only its own and the
-  switcher hides. No context or view changes when swapped.
+- Phase 1 mock `src/adapters/mock/clients.mock.ts` reads the registry.
+- Wired via `src/adapters/index.ts` as `export const clients: ClientsPort`.
+- Phase 2: `bff/clients.bff.ts` calls `GET /api/clients` / `GET /api/clients/:id`
+  scoped to the authenticated identity (admin → all; client → one). Swapping the
+  adapter replaces build-time scoping with server-side scoping — no view changes.
 
-### 4.4 ClientContext (the state)
+### 4.4 ClientContext
 
 New `src/features/clients/ClientContext.tsx`, modeled on `ReportContext`:
 
 ```typescript
 interface ClientContextValue {
-  clients: ClientSummary[];          // for the switcher
+  clients: ClientSummary[];
   selectedClient: ClientEntry;
   selectedClientId: string;
-  selectClient: (id: string) => void;   // updates ?client= in the URL
-  // convenience pass-throughs for ReportContext to consume:
-  reports: AuditReport[];
+  selectClient: (id: string) => void;     // updates ?client= and repoints ?report=
+  reports: AuditReport[];                  // for ReportContext to consume
   seedEngagements: Record<string, Engagement>;
   clientInfo: ClientInfo;
 }
 ```
 
-- Reads `?client=` via `useSearchParams`. If absent or unknown, rewrites the URL
-  to `DEFAULT_CLIENT_ID` with `replace: true` (no flash, no history spam) —
-  identical self-heal to `ReportContext`'s `?report=` handling.
-- Exposes `selectClient(id)` which sets `?client=` (and clears/repoints
-  `?report=` to the new client's latest report to avoid a stale report id).
+- Reads `?client=`; if absent/unknown, rewrites to the only (scoped build) or
+  default (internal build) client with `replace: true` — same self-heal as
+  `ReportContext`.
+- `selectClient(id)` sets `?client=` and repoints `?report=` to that client's
+  latest report (no stale report id across clients).
 
 ### 4.5 ReportContext change (minimal)
 
-- Stop importing `REPORTS` / `SEED_ENGAGEMENTS` / `CLIENT_INFO` from
-  `fixture.active`. Instead read them from `useClient()`.
-- Everything else in `ReportContext` is unchanged. Every report-scoped invariant
-  continues to hold — it now operates within the selected client.
-- `linkWithReport(path)` becomes client-aware: it preserves `?client=` as well
-  as `?report=` so internal nav never drops the client.
+- Read `REPORTS` / `SEED_ENGAGEMENTS` / `CLIENT_INFO` from `useClient()` instead
+  of `fixture.active`. Nothing else changes; every report-scoped invariant holds,
+  now scoped within the selected client.
+- `linkWithReport(path)` becomes client-aware (preserves `?client=`).
 
 ### 4.6 Provider order
 
-`src/app/Providers.tsx` — `ClientProvider` wraps `ReportProvider`, both inside
-`HashRouter` (both need URL access):
+`HashRouter → ClientProvider → ReportProvider → children` (both providers need
+URL access; client resolves before report).
 
-```
-HashRouter
-  └─ ClientProvider        // reads ?client=
-       └─ ReportProvider   // reads ?report=, consumes useClient()
-            └─ children
-```
+### 4.7 Client switcher UI (internal only)
 
-### 4.7 Client switcher UI
+- New control at the **top of the sidebar** (`src/shell/Sidebar.tsx`), visually
+  distinct from the violet report pill (upholds LESSON-1).
+- Rendered only when `clients.length > 1` (i.e. the internal build). In a scoped
+  per-client build it renders the client name as a static label, never a switcher.
 
-- New control at the **top of the sidebar** (`src/shell/Sidebar.tsx`) — the
-  highest-level "which client" context, above navigation.
-- Visually distinct from the violet report pill in `TopBar` so the two concerns
-  never compete (upholds LESSON-1: one control per concern).
-- Lists `clients` from `useClient()`; selecting calls `selectClient(id)`.
-- Phase 1: always rendered (internal/mock session = the consultant).
-- Phase 2: rendered only when the session identity is admin/Jera; a single-client
-  identity does not see it.
-- Single-client safety: if `clients.length === 1`, render the client name as a
-  static label, not an interactive switcher.
+### 4.8 Passcode gate (via the existing auth seam)
 
-### 4.8 Retiring the build-time fixture toggle
+- Extend `auth.mock.ts` so `signIn` validates a passcode configured at build time
+  (**`VITE_CLIENT_PASSCODE`**). The existing `/login` screen is the entry point;
+  the open-session shortcut is used only for unguarded internal/dev runs.
+- On success, `authStore` holds the session and the app renders. A simple route
+  guard sends unauthenticated users to `/login` (the infra — `authStore`,
+  `/login`, `AuthPort` — already exists; we add the guard + passcode check).
+- Internal build is **also** gated (an internal passcode), since it holds all
+  clients' data — it must never be openly reachable.
 
-- `fixture.active.ts` is **replaced** by the registry; `VITE_FIXTURE` no longer
-  selects a build. Both datasets ship in one build.
-- `dev:demo` / `dev:client` npm scripts: either drop them or repurpose to set a
-  default `?client=` for convenience. Decision deferred to the plan; default is
-  to drop them and rely on `DEFAULT_CLIENT_ID`.
-- `.env.demo` / `.env.client` become obsolete for mode selection; remove or
-  repurpose in the plan.
+### 4.9 Retiring VITE_FIXTURE
 
-## 5. Deployment notes
+- `fixture.active.ts` is replaced by the registry. `VITE_FIXTURE` and the
+  `dev:demo` / `dev:client` scripts are superseded by `VITE_CLIENT`
+  (+ `DEFAULT_CLIENT_ID` for the internal build). `.env.demo` / `.env.client`
+  are removed or repurposed in the plan.
 
-- Unchanged from `docs/deployment/HETZNER_DEPLOYMENT.md`: one build → `dist/` →
-  Jera Hetzner box → nginx static at `anomaly.gasecosys.co.za`. One site serves
-  all clients; the active client is a URL param.
-- **HashRouter clarification:** because routing is hash-based, the server only
-  ever receives `/`, so deep links do not 404 even without the SPA fallback. The
-  `try_files $uri $uri/ /index.html;` rule in the runbook is retained as a safe
-  best-practice net (and to serve hashed asset paths); it is not load-bearing
-  for client-side routes under HashRouter. (Runbook annotated accordingly.)
+## 5. Delivery surfaces & deployment
 
-## 6. Testing & quality gates
+From one codebase we publish multiple artifacts (each a separate `npm run build`
+with different env), all served from the Jera Hetzner box per the runbook:
 
-All three standing gates must pass (`typecheck`, `build`, manual at `:5199`).
-Extend the `QUALITY_GATES.md` regression checklist with:
+| Surface | Build env | Contains | Access |
+|---------|-----------|----------|--------|
+| Internal (all clients) | `VITE_CLIENT=all` + internal passcode | every client + switcher | private path/URL, internal passcode |
+| Per external client | `VITE_CLIENT=<id>` + that client's passcode | only that client | private link + that client's passcode |
 
-- [ ] Client switch rehydrates every screen (KPIs, findings, engagement, upload).
-- [ ] Data isolation: Tourvest figures never appear under New Client and vice
-      versa (cumulative, YoY, findings counts).
-- [ ] Deep link `#/dashboard?client=newclient&report=<id>` loads the right client.
-- [ ] Missing/unknown `?client=` self-heals to `DEFAULT_CLIENT_ID` with no flash.
-- [ ] Within each client, historical freeze + amber banner + cumulative-never-
+**Recommended topology (this week):** path-based under the one domain with a
+single TLS cert (simplest): e.g. each scoped build served from its own directory
+mapped to an unguessable path, the unguessable path being part of the "private
+link". Subdomains (`<client>.anomaly.gasecosys.co.za`, wildcard cert) are an
+option if cleaner URLs are wanted later. `base: "./"` (relative assets) + the
+SPA fallback make path-hosting work without per-build config. Exact paths/slugs
+are fixed in the deploy step once the Hetzner box + DNS are confirmed.
+
+Each artifact still passes all three gates before publish; each deploy records
+its commit SHA, `VITE_CLIENT`, and target path in the deploy log.
+
+## 6. Security posture (honest)
+
+- **The real guarantee is data isolation by build:** a client's bundle does not
+  contain any other client's data, so cross-client exposure is structurally
+  impossible — verified by the bundle grep in §7.
+- **The passcode is a gate, not a vault:** it lives in the front-end bundle, so a
+  determined party with the link could extract it. It stops casual/accidental
+  access to *that client's own* data and is appropriate for a pilot. Real
+  authentication arrives with the Phase 2 backend behind the same `AuthPort` /
+  `ClientsPort` seam. This limitation is stated to the user, not hidden.
+- Use distinct passcodes per client; treat private links as sensitive; serve only
+  over HTTPS.
+
+## 7. Testing & quality gates
+
+All three standing gates pass (`typecheck`, `build`, manual at `:5199`), plus:
+
+- [ ] **Isolation (critical):** build `VITE_CLIENT=newclient`, then grep the
+      `dist/` bundle for Tourvest identifiers (name, distinctive figures) — must
+      return **nothing**. Repeat per client.
+- [ ] Internal build (`VITE_CLIENT=all`): switcher shows; switching client
+      rehydrates every screen; figures never bleed between clients.
+- [ ] Scoped build: no switcher (static client label); `?client=` fixed; the
+      passcode gate blocks entry until the correct passcode is given.
+- [ ] Deep link `#/dashboard?client=<id>&report=<id>` loads the right client.
+- [ ] Within each client: historical freeze + amber banner + cumulative-never-
       freezes still hold.
-- [ ] Switching client repoints `?report=` to that client's latest (no stale id).
-- [ ] `clients.length === 1` renders a static label, not a dead switcher.
+- [ ] Wrong/empty passcode does not reveal any client data.
 
-## 7. Open items (outside this build)
+## 8. Open items (outside the code build)
 
 - **Hetzner box + DNS:** confirm the existing Jera Hetzner box is the target and
-  that `anomaly.gasecosys.co.za` A-record points to it (tracked in the runbook's
-  CONFIRM markers).
-- **New Client real data:** ops populates `reports.fixture.clean.ts`
-  (→ the `newClient` registry entry) with the real client name, health score,
-  leakage figures, and findings before that client is shown live.
+  the `anomaly.gasecosys.co.za` A-record points to it (runbook CONFIRM markers).
+- **Per-client passcodes + private link slugs:** set per client at deploy time.
+- **New Client real data:** ops populates `reports.fixture.clean.ts` (the
+  `newClient` entry) with real name, scores, leakage figures, and findings before
+  that client's link is sent.
 
-## 8. File summary
+## 9. File summary
 
 **New**
-- `src/features/clients/clients.data.ts` — registry + `ClientEntry` type
+- `src/features/clients/clients.data.ts` — registry, `ClientEntry`/`ClientSummary`, `VITE_CLIENT` scoping
 - `src/features/clients/ClientContext.tsx` — provider + `useClient()`
-- `src/ports/clients.port.ts` — `ClientsPort` interface
-- `src/adapters/mock/clients.mock.ts` — registry-backed mock implementation
-- `src/shell/ClientSwitcher.tsx` — sidebar switcher control
+- `src/ports/clients.port.ts` — `ClientsPort`
+- `src/adapters/mock/clients.mock.ts` — registry-backed mock
+- `src/shell/ClientSwitcher.tsx` — sidebar switcher (internal builds only)
+- route guard (small) enforcing the passcode gate before app routes
 
 **Modified**
 - `src/features/audit/ReportContext.tsx` — consume `useClient()` not `fixture.active`
 - `src/app/Providers.tsx` — add `ClientProvider` inside `HashRouter`
 - `src/adapters/index.ts` — add `export const clients`
+- `src/adapters/mock/auth.mock.ts` — passcode check via `VITE_CLIENT_PASSCODE`
 - `src/shell/Sidebar.tsx` — mount `ClientSwitcher`
 - `src/features/audit/reports.fixture.clean.ts` — becomes the `newClient` source
 
 **Removed / superseded**
 - `src/features/audit/fixture.active.ts` — replaced by the registry
-- `.env.demo`, `.env.client`, `dev:demo`/`dev:client` scripts — per 4.8
+- `.env.demo`, `.env.client`, `dev:demo`/`dev:client` — per 4.9
