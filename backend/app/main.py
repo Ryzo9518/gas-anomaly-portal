@@ -1,10 +1,14 @@
-from fastapi import Depends, FastAPI, Response
+import logging
+
+from fastapi import Depends, FastAPI, Request, Response
 from starlette.middleware.sessions import SessionMiddleware
 
 from .auth_microsoft import router as ms_router
 from .config import settings
 from .deps import current_staff
 from .security import clear_session
+
+log = logging.getLogger("uvicorn.error")
 
 app = FastAPI(title="GAS Portal API", docs_url=None, redoc_url=None, openapi_url=None)
 
@@ -26,7 +30,10 @@ def health():
 
 
 @app.get("/api/auth/session")
-def session(staff: dict | None = Depends(current_staff)):
+def session(request: Request, staff: dict | None = Depends(current_staff)):
+    # Log only anomalies (a cookie that fails to authenticate), not every poll.
+    if not staff and settings.cookie_name in request.cookies:
+        log.warning("session check: cookie present but invalid/expired")
     if not staff:
         return None
     return {

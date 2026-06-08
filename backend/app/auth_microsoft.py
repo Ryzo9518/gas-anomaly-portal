@@ -1,9 +1,13 @@
+import logging
+
 from authlib.integrations.starlette_client import OAuth
 from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse
 
 from .config import settings
 from .security import issue_session
+
+log = logging.getLogger("uvicorn.error")
 
 router = APIRouter(prefix="/api/auth/microsoft", tags=["auth"])
 
@@ -28,20 +32,38 @@ async def start(request: Request):
 async def callback(request: Request):
     try:
         token = await oauth.microsoft.authorize_access_token(request)
-    except Exception:
-        return RedirectResponse(f"{settings.app_base_url}/#/login?error=auth")
+    except Exception as e:
+        log.warning("OIDC token exchange failed: %r", e)
+        return RedirectResponse(f"{settings.app_base_url}/#/login?error=auth", status_code=302)
 
-    claims = token.get("userinfo") or {}
-    email = (claims.get("email") or claims.get("preferred_username") or "").lower()
+    claims = dict(token.get("userinfo") or {})
+    # Microsoft work-account id_tokens often omit `email`; fall back to the
+    # userinfo endpoint if the identity claims are sparse.
+    if not (claims.get("email") or claims.get("preferred_username") or claims.get("upn")):
+        try:
+            claims = dict(await oauth.microsoft.userinfo(token=token)) or claims
+        except Exception as e:
+            log.warning("userinfo fetch failed: %r", e)
+
+    email = (
+        claims.get("email")
+        or claims.get("preferred_username")
+        or claims.get("upn")
+        or ""
+    ).strip().lower()
     name = claims.get("name") or email
     sub = claims.get("sub") or email
 
-    # Tenant is already enforced by the single-tenant authority; the explicit
-    # staff allow-list is the second gate. A valid Jera token that is NOT on the
-    # list is rejected.
-    if not email or email not in settings.staff_allow_list:
-        return RedirectResponse(f"{settings.app_base_url}/#/login?error=forbidden")
+    allowed = bool(email) and email in settings.staff_allow_list
+    log.info(
+        "OIDC callback: email=%r claim_keys=%s allowed=%s",
+        email, sorted(claims.keys()), allowed,
+    )
 
-    resp = RedirectResponse(f"{settings.app_base_url}/#/auth/callback")
+    if not allowed:
+        return RedirectResponse(f"{settings.app_base_url}/#/login?error=forbidden", status_code=302)
+
+    resp = RedirectResponse(f"{settings.app_base_url}/#/auth/callback", status_code=302)
     issue_session(resp, sub=sub, email=email, name=name)
+    log.info("OIDC callback: session issued for %s", email)
     return resp
