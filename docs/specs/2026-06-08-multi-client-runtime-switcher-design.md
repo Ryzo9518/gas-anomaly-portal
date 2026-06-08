@@ -161,16 +161,28 @@ URL access; client resolves before report).
 - Rendered only when `clients.length > 1` (i.e. the internal build). In a scoped
   per-client build it renders the client name as a static label, never a switcher.
 
-### 4.8 Passcode gate (via the existing auth seam)
+### 4.8 Passcode gate (the existing login screen becomes the real gate)
 
-- Extend `auth.mock.ts` so `signIn` validates a passcode configured at build time
-  (**`VITE_CLIENT_PASSCODE`**). The existing `/login` screen is the entry point;
-  the open-session shortcut is used only for unguarded internal/dev runs.
-- On success, `authStore` holds the session and the app renders. A simple route
-  guard sends unauthenticated users to `/login` (the infra — `authStore`,
-  `/login`, `AuthPort` — already exists; we add the guard + passcode check).
-- Internal build is **also** gated (an internal passcode), since it holds all
-  clients' data — it must never be openly reachable.
+The current `/login` screen (email + password fields, `LoginCard.tsx`) is
+**kept and reused** — it is not replaced or bypassed. Today its mock `signIn`
+ignores input and opens a session; we make it actually enforce a passcode.
+
+- **Client-facing scoped build:** the client's email is **pre-filled and locked**
+  on the login screen (per-build via **`VITE_CLIENT_EMAIL`**, or derived from the
+  client entry); the client types only the **passcode** (sent with their private
+  link). `auth.mock.ts` `signIn` validates the password field against
+  **`VITE_CLIENT_PASSCODE`**; wrong passcode → no session, no data shown. The
+  screen looks unchanged; only the email is pre-populated.
+- **Internal all-clients build:** also gated (an internal passcode via the same
+  mechanism), since it holds every client's data — never openly reachable. Email
+  may be a known internal address; open-session is used only for local dev.
+- On success `authStore` holds the session and the app renders. A small route
+  guard sends unauthenticated users to `/login`. The infra (`/login`,
+  `LoginCard`, `authStore`, `AuthPort`) already exists; we add the guard, the
+  passcode check, and the per-build email pre-fill.
+- Phase 2 swaps `auth.mock` for the real `AuthPort` backend adapter (email +
+  password / magic-link) with no screen or seam changes — the same login UI then
+  authenticates real accounts.
 
 ### 4.9 Retiring VITE_FIXTURE
 
@@ -253,6 +265,7 @@ All three standing gates pass (`typecheck`, `build`, manual at `:5199`), plus:
 - `src/app/Providers.tsx` — add `ClientProvider` inside `HashRouter`
 - `src/adapters/index.ts` — add `export const clients`
 - `src/adapters/mock/auth.mock.ts` — passcode check via `VITE_CLIENT_PASSCODE`
+- `src/features/login/LoginCard.tsx` — pre-fill + lock email via `VITE_CLIENT_EMAIL`
 - `src/shell/Sidebar.tsx` — mount `ClientSwitcher`
 - `src/features/audit/reports.fixture.clean.ts` — becomes the `newClient` source
 
