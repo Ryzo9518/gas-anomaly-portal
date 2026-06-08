@@ -2,6 +2,7 @@ import * as React from "react";
 import { flushSync } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/state/authStore";
+import { auth, CURRENT_ADAPTER } from "@/adapters";
 import {
   Mail,
   Lock,
@@ -261,6 +262,26 @@ export function LoginCard() {
         Sign in with your work account to continue.
       </p>
 
+      {/* Staff door — Microsoft 365 SSO. The primary (and, in the live bff
+          build, only) sign-in path for Jera staff. */}
+      <button
+        type="button"
+        onClick={() => auth.startMicrosoftLogin()}
+        className="mt-5 flex w-full items-center justify-center gap-2.5 rounded-xl bg-white/95 px-4 py-3 text-[14px] font-semibold text-slate-800 transition-colors hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
+      >
+        <span aria-hidden className="grid h-4 w-4 grid-cols-2 gap-px">
+          <span style={{ background: "#f25022" }} />
+          <span style={{ background: "#7fba00" }} />
+          <span style={{ background: "#00a4ef" }} />
+          <span style={{ background: "#ffb900" }} />
+        </span>
+        Sign in with Microsoft
+      </button>
+
+      {/* Email/password door — local mock/dev only. Hidden in the live bff
+          build, where staff authenticate via Microsoft above. */}
+      {CURRENT_ADAPTER !== "bff" && (
+        <>
       <div className="mt-5 space-y-3">
         {/* Email */}
         <div>
@@ -476,6 +497,8 @@ export function LoginCard() {
           <ArrowRight className="h-4 w-4 transition-transform duration-220 ease-out-expo group-hover:translate-x-0.5" />
         </span>
       </button>
+        </>
+      )}
 
       {/* Footer — preceded by a delicate tapered hairline so
           the "secure access" + copyright lines feel like a
