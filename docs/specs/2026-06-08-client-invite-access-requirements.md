@@ -85,7 +85,7 @@ Admin (staff, MS SSO, admin-grant)   Backend                         Client
 - **Email via Jera M365 Graph** from `anomaly@jera.co.za` (Gasecosys has no mail tenant).
 
 ## Dependencies / Assumptions
-- **GO-LIVE BLOCKER:** Microsoft Graph **`Mail.Send` application permission with admin consent** on the **Gasecosys** Entra app — until granted, no email (invite or re-link) can send and the whole flow is untestable. Verify with a test `sendMail`. Plus: the `anomaly@jera.co.za` mailbox must exist, and an **Application Access Policy** must restrict the app to that mailbox (least privilege).
+- **Microsoft Graph `Mail.Send` application permission with admin consent** on the **Gasecosys** Entra app — **GRANTED & VERIFIED 2026-06-08** (app token carries the `Mail.Send` role). Still to confirm: the `anomaly@jera.co.za` mailbox exists/sends, and an **Application Access Policy** restricts the app to that mailbox (least privilege) — `Mail.Send` (application) can otherwise send as any mailbox in the tenant.
 - A backend **datastore** (Postgres, already on the box) for clients / contacts / invites / **sessions** / audit / rate-limit counters. The current backend is stateless (HS256 cookie, no DB) — R5/R11/R15/R16 require adding this.
 - **Graph credentials** stored in a server secret store (not source control), with a rotation policy.
 - Builds on the **already-live** staff Microsoft SSO + FastAPI backend.
