@@ -1,0 +1,19 @@
+# Dependencies + build output (regenerable)
+node_modules/
+dist/
+.vite/
+
+# Env files (may contain secrets)
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Logs
+*.log
+
+# Editor / OS noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

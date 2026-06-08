@@ -1,0 +1,430 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* GAS Anomaly Portal theme — violet primary, emerald success, neutral slate */
+
+@layer base {
+  :root {
+    --background: 220 25% 97%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    /* Indigo 700 — primary accent */
+    --primary: 263 70% 50%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 20% 96%;
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 210 20% 96%;
+    --muted-foreground: 215 16% 47%;
+
+    --accent: 263 84% 96%;
+    --accent-foreground: 263 70% 40%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 263 70% 50%;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 215 25% 27%;
+    --sidebar-primary: 263 70% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 20% 96%;
+    --sidebar-accent-foreground: 222 47% 11%;
+    --sidebar-border: 214 32% 91%;
+    --sidebar-ring: 263 70% 50%;
+  }
+
+  .dark {
+    --background: 222 47% 6%;
+    --foreground: 210 40% 98%;
+    --card: 222 47% 9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 47% 9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 263 70% 66%;
+    --primary-foreground: 222 47% 11%;
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 263 60% 24%;
+    --accent-foreground: 263 84% 92%;
+    --destructive: 0 63% 40%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 217 33% 20%;
+    --input: 217 33% 20%;
+    --ring: 263 70% 66%;
+  }
+
+  * { @apply border-border; }
+  body {
+    @apply bg-background text-foreground font-sans;
+    /* Subtle radial wash anchors the page so cards visibly lift off it.
+       Two soft violet/sky pools at the top corners + neutral base. */
+    background-image:
+      radial-gradient(ellipse 800px 500px at 0% -10%, rgba(124, 58, 237, 0.06), transparent 60%),
+      radial-gradient(ellipse 700px 400px at 100% 0%,  rgba(56, 189, 248, 0.04), transparent 60%);
+    background-attachment: fixed;
+    font-feature-settings: "cv11", "ss01";
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  /* Tabular digits everywhere by default for alignment */
+  .tabular-nums, .font-display, table td, table th {
+    font-variant-numeric: tabular-nums;
+  }
+  /* Custom scrollbar — discreet, themed */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(215 16% 80%);
+    border-radius: 8px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+  ::-webkit-scrollbar-thumb:hover { background: hsl(215 16% 65%); background-clip: padding-box; border: 2px solid transparent; }
+  /* Selection in brand color */
+  ::selection { background: rgba(124, 58, 237, 0.18); color: hsl(263 70% 25%); }
+}
+
+@layer components {
+  /* Canonical card surface — soft elevated shadow + crisp hairline border.
+     Hover lifts and brightens the border. transition uses our ease-out-expo
+     curve for a confident, snappy motion that still feels smooth. */
+  .gas-card {
+    /* overflow-hidden: clips header gradient + content to rounded corners — matches mock .card */
+    /* rounded-[14px]: mock --r-xl:14px (Tailwind rounded-xl=12px undershoots by 2px)      */
+    /* border-slate-200: mock --border:#E2E8F0 at full opacity (was /70 — too faint on white)*/
+    /* shadow: literal value — shadow-card token inside @apply is unreliable in JIT           */
+    /*         (same fix applied to StatTile shadow-tile). Mock .card box-shadow exact.       */
+    @apply bg-card rounded-[14px] overflow-hidden border border-slate-200
+           transition-[box-shadow,border-color,transform] duration-300 ease-out-expo;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 2px 8px rgba(0,0,0,0.04), 0 0 0 1px rgba(0,0,0,0.03);
+  }
+  .gas-card-interactive {
+    @apply hover:border-slate-300 hover:-translate-y-px cursor-pointer;
+    /* hover shadow also inlined — same JIT token reliability reason */
+    transition: box-shadow 300ms cubic-bezier(0.16,1,0.3,1),
+                border-color 300ms cubic-bezier(0.16,1,0.3,1),
+                transform 300ms cubic-bezier(0.16,1,0.3,1);
+  }
+  .gas-card-interactive:hover {
+    box-shadow: 0 2px 4px rgba(15,23,42,0.06), 0 12px 28px -8px rgba(15,23,42,0.14);
+  }
+  .gas-section-gap > * + * { margin-top: 20px; }
+
+  /* Glass surface — used by sticky headers / popovers for depth */
+  .gas-glass {
+    @apply bg-white/75 backdrop-blur-xl backdrop-saturate-150 border-b border-slate-200/60;
+  }
+
+  /* Gradient text — for hero numbers / headlines */
+  .gas-gradient-text {
+    background: linear-gradient(135deg, #4C1D95 0%, #6D28D9 45%, #8B5CF6 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+
+  /* Shimmer skeleton — replaces flat gray loading blocks */
+  .gas-shimmer {
+    background: linear-gradient(
+      90deg,
+      hsl(214 32% 94%) 0%,
+      hsl(214 32% 98%) 50%,
+      hsl(214 32% 94%) 100%
+    );
+    background-size: 200% 100%;
+    @apply animate-shimmer;
+  }
+
+  /* Underline reveal — for nav-style links */
+  .gas-link-underline {
+    @apply relative;
+  }
+  .gas-link-underline::after {
+    content: "";
+    @apply absolute left-0 -bottom-0.5 h-px w-full origin-left scale-x-0
+           bg-current opacity-60 transition-transform duration-300 ease-out-expo;
+  }
+  .gas-link-underline:hover::after { @apply scale-x-100; }
+
+  /* Press-down micro-interaction for primary actions */
+  .gas-press {
+    @apply transition-transform duration-150 ease-out-expo
+           active:scale-[0.97];
+  }
+
+  /* Focus-visible ring with brand offset */
+  .gas-focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500
+           focus-visible:ring-offset-2 focus-visible:ring-offset-white;
+  }
+}
+
+@layer utilities {
+  /* Status dot pulse — used by KPI tiles to signal a live "healthy"
+     reading. A soft emerald ring expands and fades every 2.4s; the dot
+     itself stays steady so the figure doesn't compete for attention. */
+  @keyframes status-pulse {
+    0%, 100% { box-shadow: 0 0 0 0   rgba(16, 185, 129, 0.55); }
+    50%      { box-shadow: 0 0 0 5px rgba(16, 185, 129, 0);    }
+  }
+  .animate-status-pulse {
+    animation: status-pulse 2.4s ease-in-out infinite;
+  }
+
+  /* NLPearl halo + breathe — used by the NLPearl orb/avatar ring.
+     halo-spin: slow 4s rotation for the dashed halo ring.
+     pearl-breathe: gentle 2.8s opacity pulse on the orb itself. */
+  @keyframes halo-spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+  .animate-halo-spin {
+    animation: halo-spin 4s linear infinite;
+  }
+  @keyframes pearl-breathe {
+    /* Mock-exact values: halo breathes between 35% and 58% opacity
+       to produce the rotating-light-beam pulsation on the nlp-halo. */
+    0%, 100% { opacity: 0.35; }
+    50%       { opacity: 0.58; }
+  }
+  .animate-pearl-breathe {
+    animation: pearl-breathe 2.8s ease-in-out infinite;
+  }
+
+  /* pearl-listen — sonar ping for the Pearl Intelligence icon.
+     A border ring starts at half-size (scale 0.5) and expands to
+     scale 1.85 while fading out. Two rings staggered 1.1s apart
+     produce a continuous "listening" pulse inside the 28×28 icon box.
+     The ring's parent is 13×13 (SectionHeader [&>*] constraint);
+     at scale 1.85 it reaches ≈24px — safely within the 28px container.
+     Easing is ease-out so the ring decelerates as it expands (natural). */
+  @keyframes pearl-listen {
+    0%   { opacity: 0.7; transform: scale(0.5); }
+    70%  { opacity: 0.1; transform: scale(1.85); }
+    100% { opacity: 0;   transform: scale(1.9); }
+  }
+
+  /* ── GAS base lava layer ──────────────────────────────────────────
+     A single fixed-positioned layer that lives at the very back of
+     the app shell. Three heavily-blurred radial glows are pinned to
+     the corners — bottom-left (primary, brightest) + top-left and
+     top-right (secondary, dimmer) — with the screen center kept
+     deliberately dark and neutral so the effect reads as ambient
+     light entering from outside the frame, not a colored wash.
+     Two pseudo-element layers drift on independent slow loops
+     (20s + 30s alternate) to produce gentle organic morphing
+     without obvious cycle endpoints. The layer sits at z-index:0
+     inside the AppLayout's isolated stacking context. The dark
+     sidebar + top bar use `bg-slate-950/85` so ~15% of the lava
+     bleeds through as premium atmosphere; the white dashboard body
+     stays opaque (`bg-slate-50`) and fully hides the lava. Strong
+     filter:blur() values (80–110px) keep every glow soft and
+     diffuse — no edges, no defined shapes, just pools of light. */
+  .gas-base-lava {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+    /* Static base — near-black neutral with a faint deep-purple
+       linear bottom wash. No center glow on purpose. */
+    background:
+      radial-gradient(ellipse 55% 45% at 0% 100%,  rgba(147, 51, 234, 0.32), transparent 70%),
+      radial-gradient(ellipse 45% 35% at 0% 0%,    rgba(124, 58, 237, 0.22), transparent 70%),
+      radial-gradient(ellipse 45% 35% at 100% 0%,  rgba(76, 29, 149, 0.22),  transparent 70%),
+      linear-gradient(180deg, #02040f 0%, #060417 60%, #0a0524 100%);
+  }
+  .gas-base-lava::before {
+    content: "";
+    position: absolute;
+    inset: -25%;
+    pointer-events: none;
+    /* Primary corner glows — bottom-left dominant, top-left echo.
+       All anchored to corners, leaving center transparent. */
+    background:
+      radial-gradient(ellipse 60% 50% at 5% 100%, rgba(147, 51, 234, 0.55), transparent 65%),
+      radial-gradient(ellipse 40% 35% at 8% 8%,   rgba(124, 58, 237, 0.36), transparent 70%);
+    filter: blur(90px);
+    opacity: 0.78;
+    will-change: transform, opacity;
+    animation: gasLavaBubbleA 22s ease-in-out infinite alternate;
+  }
+  .gas-base-lava::after {
+    content: "";
+    position: absolute;
+    inset: -25%;
+    pointer-events: none;
+    /* Secondary corner glow — top-right + a soft echo across the
+       bottom-left axis to keep the primary corner alive while the
+       ::before layer is at its faded phase. */
+    background:
+      radial-gradient(ellipse 45% 38% at 95% 5%,  rgba(76, 29, 149, 0.42),  transparent 70%),
+      radial-gradient(ellipse 50% 42% at 12% 95%, rgba(124, 58, 237, 0.30), transparent 72%);
+    filter: blur(110px);
+    opacity: 0.62;
+    will-change: transform, opacity;
+    animation: gasLavaBubbleB 32s ease-in-out infinite alternate-reverse;
+  }
+  @keyframes gasLavaBubbleA {
+    0%   { transform: translate3d(-3%,  3%, 0) scale(1)    rotate(0deg);  opacity: 0.62; }
+    35%  { transform: translate3d( 2%, -1%, 0) scale(1.06) rotate(2deg);  opacity: 0.84; }
+    70%  { transform: translate3d( 4%,  2%, 0) scale(1.10) rotate(-2deg); opacity: 0.74; }
+    100% { transform: translate3d(-1%, -3%, 0) scale(1.14) rotate(3deg);  opacity: 0.68; }
+  }
+  @keyframes gasLavaBubbleB {
+    0%   { transform: translate3d( 3%, -2%, 0) scale(1.04) rotate(0deg);  opacity: 0.50; }
+    45%  { transform: translate3d(-2%,  3%, 0) scale(1.12) rotate(-3deg); opacity: 0.70; }
+    100% { transform: translate3d( 1%,  4%, 0) scale(1.18) rotate(4deg);  opacity: 0.56; }
+  }
+
+  /* === LOGIN AURORA — VERTICAL-MIRROR BACKGROUND ===
+     Three blurred radial-gradient blobs drift slowly at the BOTTOM of
+     the shell — violet wash spreads UP from below. Swap with
+     gas-base-lava in AppLayout.tsx to activate the alternate dark base.
+     Class name `.bp-aurora` retained for historical compatibility; the
+     CSS for both layers stays here permanently. */
+  @keyframes bp-aurora-drift-1 {
+    0%, 100% { transform: translate3d(-10%,  8%, 0) rotate(0deg)  scale(1);    }
+    33%      { transform: translate3d(  8%, -4%, 0) rotate(12deg) scale(1.08); }
+    66%      { transform: translate3d( -4%,-10%, 0) rotate(-6deg) scale(0.95); }
+  }
+  @keyframes bp-aurora-drift-2 {
+    0%, 100% { transform: translate3d( 12%, -6%, 0) rotate(0deg)   scale(1);   }
+    50%      { transform: translate3d( -8%,  4%, 0) rotate(-18deg) scale(1.1); }
+  }
+  @keyframes bp-aurora-drift-3 {
+    0%, 100% { transform: translate3d( -6%,-12%, 0) rotate(0deg)  scale(0.9);  }
+    50%      { transform: translate3d( 10%, 10%, 0) rotate(22deg) scale(1.05); }
+  }
+
+  .bp-aurora {
+    position: fixed;           /* viewport-wide, intercepts nothing */
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+    /* NO background color — bg-slate-50 on the outer wrapper is the
+       white base. Blobs float on top of that white, identical to the
+       client portal gas-aurora approach. */
+  }
+  .bp-aurora::before,
+  .bp-aurora::after,
+  .bp-aurora > span {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(90px);
+    opacity: 0.5;
+    will-change: transform;
+  }
+  /* Bottom-left — dominant violet, pushed well off-screen so only
+     the soft diffuse edge bleeds into the viewport as a hint of colour */
+  .bp-aurora::before {
+    width: 820px; height: 820px;
+    bottom: -420px; left: -220px;
+    background: radial-gradient(circle, rgba(109,40,217,0.55) 0%, rgba(109,40,217,0) 70%);
+    animation: bp-aurora-drift-1 22s ease-in-out infinite;
+  }
+  /* Bottom-right — indigo, same treatment */
+  .bp-aurora::after {
+    width: 720px; height: 720px;
+    bottom: -360px; right: -240px;
+    background: radial-gradient(circle, rgba(79,70,229,0.5) 0%, rgba(79,70,229,0) 70%);
+    animation: bp-aurora-drift-2 28s ease-in-out infinite;
+  }
+  /* Centre-bottom — softest blob, just a whisper above the fold */
+  .bp-aurora > span {
+    width: 620px; height: 620px;
+    bottom: -200px; left: 35%;
+    background: radial-gradient(circle, rgba(167,139,250,0.42) 0%, rgba(167,139,250,0) 70%);
+    animation: bp-aurora-drift-3 32s ease-in-out infinite;
+  }
+
+  /* Honor reduced-motion preference globally for our animations */
+  @media (prefers-reduced-motion: reduce) {
+    .gas-card, .gas-card-interactive, .gas-press, .gas-link-underline::after,
+    .animate-shimmer, .animate-fade-in, .animate-slide-up, .animate-slide-in-right,
+    .animate-status-pulse, .animate-halo-spin, .animate-pearl-breathe,
+    [style*="pearl-listen"] {
+      transition: none !important;
+      animation: none !important;
+    }
+    .gas-base-lava::before,
+    .gas-base-lava::after {
+      animation: none !important;
+    }
+    .bp-aurora::before,
+    .bp-aurora::after,
+    .bp-aurora > span {
+      animation: none !important;
+    }
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Login → Sidebar panel morph  (gas-login-morph)
+   ─────────────────────────────────────────────────────────────────────────────
+   Triggered by document.startViewTransition() in LoginCard.tsx on sign-in.
+
+   OLD state → login Hero column  (~7/12 screen width, full viewport height)
+   NEW state → Sidebar <aside>    (248 px, full viewport height, x = 0)
+
+   ::view-transition-group interpolates position + size automatically.
+   We only govern the duration, easing, and the content cross-dissolve
+   inside the morphing box.
+
+   Browser support: Chrome 111+, Edge 111+, Safari 18+
+   Firefox: document.startViewTransition is undefined → plain navigate() fallback
+   ─────────────────────────────────────────────────────────────────────────────*/
+
+/* Bounding-box interpolation: ease-out-expo, 560 ms                          */
+::view-transition-group(gas-login-morph) {
+  animation-duration: 560ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Old content (Hero panel) fades out over the first half of the morph        */
+@keyframes gas-morph-out {
+  to { opacity: 0; }
+}
+::view-transition-old(gas-login-morph) {
+  animation: gas-morph-out 280ms ease-out forwards;
+}
+
+/* New content (Sidebar) fades in during the second half                      */
+@keyframes gas-morph-in {
+  from { opacity: 0; }
+}
+::view-transition-new(gas-login-morph) {
+  animation: gas-morph-in 280ms ease-in 280ms both;
+}
+
+/* Reduced-motion: collapse all timings to near-zero — no morph, instant nav  */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(gas-login-morph),
+  ::view-transition-old(gas-login-morph),
+  ::view-transition-new(gas-login-morph) {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+  }
+}

@@ -1,0 +1,855 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Tourvest Travel Group — Y1 2026 Audit Report</title>
+<style>
+  *,
+  *::before,
+  *::after { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: #f8fafc;
+    color: #0f172a;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .doc {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 0 0 96px 0;
+    background: #ffffff;
+    border-left: 1px solid #e2e8f0;
+    border-right: 1px solid #e2e8f0;
+  }
+
+  /* ── Cover ───────────────────────────────────────────────── */
+  .cover {
+    padding: 64px 56px 48px;
+    background: linear-gradient(155deg, #0f172a 0%, #1e1b4b 60%, #4c1d95 100%);
+    color: #ffffff;
+    border-bottom: 4px solid #7c3aed;
+  }
+  .cover-eyebrow {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #c4b5fd;
+    margin-bottom: 18px;
+  }
+  .cover-title {
+    font-size: 38px;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    line-height: 1.05;
+    margin: 0 0 12px 0;
+  }
+  .cover-sub {
+    font-size: 16px;
+    color: #cbd5e1;
+    margin: 0 0 28px 0;
+    max-width: 540px;
+  }
+  .cover-meta {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+  }
+  .cover-meta dt {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #a78bfa;
+    margin-bottom: 6px;
+  }
+  .cover-meta dd {
+    font-size: 14px;
+    color: #ffffff;
+    margin: 0;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Section frame ───────────────────────────────────────── */
+  section { padding: 48px 56px; border-bottom: 1px solid #f1f5f9; }
+  section:last-of-type { border-bottom: 0; }
+  .section-eyebrow {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 9.5px;
+    letter-spacing: 0.20em;
+    text-transform: uppercase;
+    color: #7c3aed;
+    margin-bottom: 10px;
+  }
+  h2 {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: 0 0 8px 0;
+    color: #0f172a;
+  }
+  .section-lede {
+    font-size: 15px;
+    color: #475569;
+    margin: 0 0 28px 0;
+    max-width: 640px;
+    line-height: 1.6;
+  }
+  h3 {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 24px 0 8px 0;
+    color: #0f172a;
+  }
+  p { margin: 0 0 12px 0; color: #334155; }
+
+  /* ── Hero score block ────────────────────────────────────── */
+  .score-hero {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 32px;
+    padding: 28px 32px;
+    background: linear-gradient(135deg, #faf5ff 0%, #ffffff 70%);
+    border: 1px solid #e9d5ff;
+    border-radius: 12px;
+    align-items: center;
+    margin-bottom: 28px;
+  }
+  .score-hero-num {
+    font-size: 88px;
+    font-weight: 900;
+    letter-spacing: -0.05em;
+    line-height: 1;
+    color: #7c3aed;
+    font-variant-numeric: tabular-nums;
+  }
+  .score-hero-delta {
+    display: inline-block;
+    margin-top: 6px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: #ecfdf5;
+    color: #047857;
+    font-size: 12px;
+    font-weight: 700;
+    border: 1px solid #a7f3d0;
+  }
+  .score-hero-title {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: 0 0 8px 0;
+  }
+  .score-hero-body { color: #475569; font-size: 14px; margin: 0; }
+
+  /* ── Sub-score grid ──────────────────────────────────────── */
+  .subscore-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin: 20px 0 4px 0;
+  }
+  .subscore {
+    padding: 16px 18px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    background: #ffffff;
+  }
+  .subscore-label {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #64748b;
+    margin-bottom: 6px;
+  }
+  .subscore-val {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: #0f172a;
+    font-variant-numeric: tabular-nums;
+    margin: 0;
+  }
+  .subscore-delta {
+    margin-top: 4px;
+    font-size: 11px;
+    color: #059669;
+    font-weight: 600;
+  }
+  .subscore-delta.flat { color: #94a3b8; }
+
+  /* ── Risk register ───────────────────────────────────────── */
+  .risk {
+    padding: 20px 0;
+    border-top: 1px solid #f1f5f9;
+  }
+  .risk:last-of-type { border-bottom: 1px solid #f1f5f9; }
+  .risk-head {
+    display: grid;
+    grid-template-columns: 40px 1fr auto;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .risk-rank {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 13px;
+    color: #94a3b8;
+    font-weight: 600;
+    padding-top: 2px;
+    font-variant-numeric: tabular-nums;
+  }
+  .risk-title { font-size: 15px; font-weight: 700; color: #0f172a; margin: 0 0 4px 0; }
+  .risk-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 11.5px;
+    color: #64748b;
+    margin-bottom: 8px;
+  }
+  .risk-meta span { display: inline-flex; align-items: center; gap: 6px; }
+  .risk-meta strong { color: #334155; font-weight: 600; }
+  .risk-body { font-size: 13.5px; color: #475569; margin: 0; }
+  .risk-impact {
+    text-align: right;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 14px;
+    font-weight: 700;
+    color: #0f172a;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .risk-impact small {
+    display: block;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 9px;
+    color: #94a3b8;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 2px;
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border: 1px solid;
+  }
+  .chip.critical { background: #fff1f2; color: #be123c; border-color: #fecdd3; }
+  .chip.high     { background: #fffbeb; color: #b45309; border-color: #fed7aa; }
+  .chip.medium   { background: #eef2ff; color: #4338ca; border-color: #c7d2fe; }
+  .chip.low      { background: #f1f5f9; color: #475569; border-color: #cbd5e1; }
+
+  /* ── Leakage breakdown ───────────────────────────────────── */
+  .leakage-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 12px 0 0 0;
+  }
+  .leakage-card {
+    padding: 22px 24px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    background: linear-gradient(155deg, #ffffff 0%, #fafaff 100%);
+  }
+  .leakage-eyebrow {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 9.5px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #7c3aed;
+    margin-bottom: 6px;
+  }
+  .leakage-num {
+    font-size: 36px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: #0f172a;
+    margin: 0 0 4px 0;
+    font-variant-numeric: tabular-nums;
+  }
+  .leakage-cap { font-size: 12.5px; color: #64748b; margin: 0; }
+  .leakage-breakdown {
+    margin: 22px 0 0 0;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 18px;
+  }
+  .leakage-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    padding: 8px 0;
+    font-size: 13px;
+    border-bottom: 1px dashed #f1f5f9;
+  }
+  .leakage-row:last-of-type { border-bottom: 0; }
+  .leakage-row span { color: #475569; }
+  .leakage-row strong {
+    color: #0f172a;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Process issues list ─────────────────────────────────── */
+  .proc { padding: 16px 0; border-top: 1px solid #f1f5f9; }
+  .proc:last-of-type { border-bottom: 1px solid #f1f5f9; }
+  .proc-title {
+    font-size: 14px; font-weight: 700; color: #0f172a; margin: 0 0 4px 0;
+  }
+  .proc-body { font-size: 13px; color: #475569; margin: 0; }
+  .proc-tag {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 1px 7px;
+    background: #f1f5f9;
+    color: #475569;
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border-radius: 3px;
+    vertical-align: middle;
+  }
+
+  /* ── Roadmap table ───────────────────────────────────────── */
+  table.roadmap {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+    font-size: 13px;
+  }
+  table.roadmap thead th {
+    text-align: left;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #64748b;
+    font-weight: 500;
+    padding: 10px 12px;
+    border-bottom: 2px solid #e2e8f0;
+    background: #f8fafc;
+  }
+  table.roadmap tbody td {
+    padding: 12px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #334155;
+    vertical-align: top;
+  }
+  table.roadmap tbody tr:last-of-type td { border-bottom: 0; }
+  table.roadmap tbody td:first-child { font-weight: 600; color: #0f172a; max-width: 320px; }
+  table.roadmap tbody td:nth-child(4) { font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 11.5px; color: #64748b; font-variant-numeric: tabular-nums; }
+
+  /* ── Footer ──────────────────────────────────────────────── */
+  footer {
+    padding: 32px 56px;
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 11.5px;
+    line-height: 1.6;
+    border-top: 1px solid #e2e8f0;
+  }
+  footer .mark {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 9.5px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #7c3aed;
+    margin-bottom: 8px;
+  }
+</style>
+</head>
+<body>
+<div class="doc">
+
+  <!-- ────────── COVER ────────── -->
+  <header class="cover">
+    <div class="cover-eyebrow">GAS Anomaly · Sage X3 audit report</div>
+    <h1 class="cover-title">Tourvest Travel Group<br />Y1 2026 audit report</h1>
+    <p class="cover-sub">
+      Five-day, AI-driven audit of the Sage X3 environment.
+      Health-scored, risk-ranked, leakage-quantified.
+    </p>
+    <dl class="cover-meta">
+      <div><dt>Cycle</dt><dd>Y1 2026</dd></div>
+      <div><dt>Completed</dt><dd>12 Apr 2026</dd></div>
+      <div><dt>Engine version</dt><dd>v2.4.1</dd></div>
+      <div><dt>Report ID</dt><dd>TRV-Y1-26Q1</dd></div>
+    </dl>
+  </header>
+
+  <!-- ────────── EXEC SUMMARY ────────── -->
+  <section>
+    <div class="section-eyebrow">01 · Executive summary</div>
+    <h2>The system is healthier than last year. Two critical risks remain.</h2>
+    <p class="section-lede">
+      Tourvest's Sage X3 environment scored 74 of 100 in Y1, a 12-point improvement
+      over the Y0 baseline of 62. Severe-risk count fell from 11 to 6, and an
+      estimated R 240K of annual leakage was closed. Two critical control gaps
+      persist and warrant Q3 action.
+    </p>
+
+    <div class="score-hero">
+      <div>
+        <div class="score-hero-num">74</div>
+        <span class="score-hero-delta">+12 vs Y0 · Target 80</span>
+      </div>
+      <div>
+        <p class="score-hero-title">System Health Score</p>
+        <p class="score-hero-body">
+          Composite of four pillars — Controls, Data Quality, Leakage Reduction,
+          and Efficiency. The score reflects the audited environment as of
+          12 April 2026 and is calibrated against the Sage X3 reference
+          benchmark for travel-services operators.
+        </p>
+      </div>
+    </div>
+
+    <h3>What changed</h3>
+    <p>
+      Five severe risks closed since the Y0 baseline, including the most
+      acute SoD conflict in payroll, the GL duplicate-journal issue, and the
+      vendor-master orphan-record class. Two new findings emerged in the
+      reporting layer (cached overnight data) and the FX revaluation
+      schedule — both are low-to-medium impact but warrant action this cycle.
+    </p>
+  </section>
+
+  <!-- ────────── SCORE BREAKDOWN ────────── -->
+  <section>
+    <div class="section-eyebrow">02 · Score breakdown</div>
+    <h2>How the 74 is composed</h2>
+    <p class="section-lede">
+      Each pillar is scored independently and weighted equally. Movement
+      since Y0 reflects either closed findings or new findings in that
+      pillar.
+    </p>
+
+    <div class="subscore-grid">
+      <div class="subscore">
+        <div class="subscore-label">Controls</div>
+        <p class="subscore-val">68</p>
+        <div class="subscore-delta">+8 vs Y0</div>
+      </div>
+      <div class="subscore">
+        <div class="subscore-label">Data quality</div>
+        <p class="subscore-val">72</p>
+        <div class="subscore-delta">+14 vs Y0</div>
+      </div>
+      <div class="subscore">
+        <div class="subscore-label">Leakage reduction</div>
+        <p class="subscore-val">78</p>
+        <div class="subscore-delta">+16 vs Y0</div>
+      </div>
+      <div class="subscore">
+        <div class="subscore-label">Efficiency</div>
+        <p class="subscore-val">78</p>
+        <div class="subscore-delta flat">±0 vs Y0</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ────────── RISK REGISTER ────────── -->
+  <section>
+    <div class="section-eyebrow">03 · Top-10 risk register</div>
+    <h2>Ranked by financial impact</h2>
+    <p class="section-lede">
+      Each finding includes a quantified financial impact (where modellable),
+      severity classification, recommended fix, and proposed owner.
+    </p>
+
+    <div class="risk">
+      <div class="risk-head">
+        <div class="risk-rank">01</div>
+        <div>
+          <p class="risk-title">Segregation of duties conflict in AP module</p>
+          <div class="risk-meta">
+            <span class="chip critical">Critical</span>
+            <span><strong>Category:</strong> Controls</span>
+            <span><strong>Owner:</strong> Finance Manager</span>
+          </div>
+          <p class="risk-body">
+            Three users hold both invoice-creation and invoice-approval
+            permissions in the AP module. Recommended fix: split roles
+            and enforce via a workflow lock that rejects same-user approval.
+          </p>
+        </div>
+        <div class="risk-impact"><small>Impact</small>R 180K</div>
+      </div>
+    </div>
+
+    <div class="risk">
+      <div class="risk-head">
+        <div class="risk-rank">02</div>
+        <div>
+          <p class="risk-title">Duplicate vendor records with shared bank details</p>
+          <div class="risk-meta">
+            <span class="chip critical">Critical</span>
+            <span><strong>Category:</strong> Data quality</span>
+            <span><strong>Owner:</strong> AP Lead</span>
+          </div>
+          <p class="risk-body">
+            Seven duplicate vendor records identified by matching bank
+            account numbers. Add a uniqueness constraint on the bank-details
+            field and merge existing duplicates.
+          </p>
+        </div>
+        <div class="risk-impact"><small>Impact</small>R 95K</div>
+      </div>
+    </div>
+
+    <div class="risk">
+      <div class="risk-head">
+        <div class="risk-rank">03</div>
+        <div>
+          <p class="risk-title">PO approval thresholds bypassed via journal entries</p>
+          <div class="risk-meta">
+            <span class="chip high">High</span>
+            <span><strong>Category:</strong> Controls</span>
+            <span><strong>Owner:</strong> Finance Manager</span>
+          </div>
+          <p class="risk-body">
+            Journals over R50K were being booked directly without secondary
+            approval. Add a workflow lock and audit trailing 12 months for
+            back-dated entries.
+          </p>
+        </div>
+        <div class="risk-impact"><small>Impact</small>R 68K</div>
+      </div>
+    </div>
+
+    <div class="risk">
+      <div class="risk-head">
+        <div class="risk-rank">04</div>
+        <div>
+          <p class="risk-title">Dormant user accounts with active permissions</p>
+          <div class="risk-meta">
+            <span class="chip high">High</span>
+            <span><strong>Category:</strong> Controls</span>
+            <span><strong>Owner:</strong> IT Lead</span>
+          </div>
+          <p class="risk-body">
+            Eighteen user accounts inactive for more than 90 days retain
+            active module permissions. Deactivate and schedule a quarterly
+            access-review workflow.
+          </p>
+        </div>
+        <div class="risk-impact"><small>Impact</small>—</div>
+      </div>
+    </div>
+
+    <div class="risk">
+      <div class="risk-head">
+        <div class="risk-rank">05</div>
+        <div>
+          <p class="risk-title">GL account 4100 used for multiple expense categories</p>
+          <div class="risk-meta">
+            <span class="chip high">High</span>
+            <span><strong>Category:</strong> Data quality</span>
+            <span><strong>Owner:</strong> Finance Manager</span>
+          </div>
+          <p class="risk-body">
+            Account 4100 mixes Travel, Marketing, and Office expenses.
+            Split into dedicated child accounts and reclassify the trailing
+            12 months.
+          </p>
+        </div>
+        <div class="risk-impact"><small>Impact</small>R 42K</div>
+      </div>
+    </div>
+
+    <div class="risk">
+      <div class="risk-head">
+        <div class="risk-rank">06</div>
+        <div>
+          <p class="risk-title">Invoice payment terms inconsistent across vendors</p>
+          <div class="risk-meta">
+            <span class="chip high">High</span>
+            <span><strong>Category:</strong> Efficiency</span>
+            <span><strong>Owner:</strong> AP Lead</span>
+          </div>
+          <p class="risk-body">
+            Vendor master shows 12 distinct payment-term configurations
+            across the active book. Standardise on Net 30 unless contractually
+            overridden.
+          </p>
+        </div>
+        <div class="risk-impact"><small>Impact</small>R 38K</div>
+      </div>
+    </div>
+
+    <div class="risk">
+      <div class="risk-head">
+        <div class="risk-rank">07</div>
+        <div>
+          <p class="risk-title">PO receipt confirmations missing on 12% of POs</p>
+          <div class="risk-meta">
+            <span class="chip medium">Medium</span>
+            <span><strong>Category:</strong> Efficiency</span>
+            <span><strong>Owner:</strong> Procurement</span>
+          </div>
+          <p class="risk-body">
+            Twelve percent of POs lack receipt confirmation beyond the
+            14-day window. Auto-reminder workflow and 30-day escalation to
+            procurement lead.
+          </p>
+        </div>
+        <div class="risk-impact"><small>Impact</small>R 22K</div>
+      </div>
+    </div>
+
+    <div class="risk">
+      <div class="risk-head">
+        <div class="risk-rank">08</div>
+        <div>
+          <p class="risk-title">Foreign currency revaluation runs intermittently</p>
+          <div class="risk-meta">
+            <span class="chip medium">Medium</span>
+            <span><strong>Category:</strong> Data quality</span>
+            <span><strong>Owner:</strong> Finance Manager</span>
+          </div>
+          <p class="risk-body">
+            FX revaluation was skipped in 4 of the last 12 month-end closes.
+            Make it a mandatory workflow step.
+          </p>
+        </div>
+        <div class="risk-impact"><small>Impact</small>R 18K</div>
+      </div>
+    </div>
+
+    <div class="risk">
+      <div class="risk-head">
+        <div class="risk-rank">09</div>
+        <div>
+          <p class="risk-title">User training records not linked to access provisioning</p>
+          <div class="risk-meta">
+            <span class="chip medium">Medium</span>
+            <span><strong>Category:</strong> Controls</span>
+            <span><strong>Owner:</strong> IT Lead</span>
+          </div>
+          <p class="risk-body">
+            No training-complete gate exists before granting module access.
+            Add the gate and back-fill records for existing users.
+          </p>
+        </div>
+        <div class="risk-impact"><small>Impact</small>—</div>
+      </div>
+    </div>
+
+    <div class="risk">
+      <div class="risk-head">
+        <div class="risk-rank">10</div>
+        <div>
+          <p class="risk-title">Reporting workflows trigger off cached overnight data</p>
+          <div class="risk-meta">
+            <span class="chip low">Low</span>
+            <span><strong>Category:</strong> Efficiency</span>
+            <span><strong>Owner:</strong> IT Lead</span>
+          </div>
+          <p class="risk-body">
+            CFO dashboards read from an overnight cache, introducing
+            same-day blind spots. Move to a live data source. Keep cache
+            for board-pack only.
+          </p>
+        </div>
+        <div class="risk-impact"><small>Impact</small>R 17K</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ────────── LEAKAGE ────────── -->
+  <section>
+    <div class="section-eyebrow">04 · Cost leakage analysis</div>
+    <h2>R 480K of annualised leakage modelled</h2>
+    <p class="section-lede">
+      Quantified loss range across the audited 12-month window. Recoverable
+      portion is the subset reachable through the recommended fixes alone.
+    </p>
+
+    <div class="leakage-grid">
+      <div class="leakage-card">
+        <div class="leakage-eyebrow">Annualised leakage</div>
+        <p class="leakage-num">R 480K</p>
+        <p class="leakage-cap">Total modelled loss across all 10 findings.</p>
+      </div>
+      <div class="leakage-card">
+        <div class="leakage-eyebrow">Recoverable</div>
+        <p class="leakage-num">R 320K</p>
+        <p class="leakage-cap">Reachable through the recommended fixes in this cycle.</p>
+      </div>
+    </div>
+
+    <div class="leakage-breakdown">
+      <div class="leakage-row"><span>SoD conflicts (AP duplicate-pay risk)</span><strong>R 180K</strong></div>
+      <div class="leakage-row"><span>Duplicate vendors (overpayment exposure)</span><strong>R 95K</strong></div>
+      <div class="leakage-row"><span>PO threshold bypass (uncontrolled spend)</span><strong>R 68K</strong></div>
+      <div class="leakage-row"><span>GL misclassification (rebate / VAT reclaim)</span><strong>R 42K</strong></div>
+      <div class="leakage-row"><span>Payment-term inconsistency (working capital)</span><strong>R 38K</strong></div>
+      <div class="leakage-row"><span>PO confirmations missing (accrual error)</span><strong>R 22K</strong></div>
+      <div class="leakage-row"><span>FX revaluation gaps</span><strong>R 18K</strong></div>
+      <div class="leakage-row"><span>Reporting latency (operational waste)</span><strong>R 17K</strong></div>
+    </div>
+  </section>
+
+  <!-- ────────── PROCESS ISSUES ────────── -->
+  <section>
+    <div class="section-eyebrow">05 · Process issues</div>
+    <h2>Workflow failures observed</h2>
+    <p class="section-lede">
+      Non-quantified findings that influenced the score but didn't model
+      directly into leakage.
+    </p>
+
+    <div class="proc">
+      <p class="proc-title">
+        Month-end close averages 9.2 days
+        <span class="proc-tag">Efficiency</span>
+      </p>
+      <p class="proc-body">
+        Above the Sage X3 reference benchmark of 6 days. Bottleneck identified
+        in manual AP reconciliation and the FX revaluation gap (finding 08).
+      </p>
+    </div>
+
+    <div class="proc">
+      <p class="proc-title">
+        AP invoice cycle uses 4 workarounds outside Sage X3
+        <span class="proc-tag">Workaround</span>
+      </p>
+      <p class="proc-body">
+        Two Excel-based reconciliation templates and two email-based approval
+        routes operate in parallel to the system. Each is a control gap and
+        an audit-trail gap.
+      </p>
+    </div>
+
+    <div class="proc">
+      <p class="proc-title">
+        Reporting layer has 6 dashboards reading from the same overnight cache
+        <span class="proc-tag">Architecture</span>
+      </p>
+      <p class="proc-body">
+        Centralising to a single live read-replica would close finding 10
+        and reduce data-staleness complaints from the executive team.
+      </p>
+    </div>
+  </section>
+
+  <!-- ────────── ROADMAP ────────── -->
+  <section>
+    <div class="section-eyebrow">06 · Remediation roadmap</div>
+    <h2>What to action by when</h2>
+    <p class="section-lede">
+      Each finding has an assigned owner and proposed timeline. SLA target
+      is "all critical + high closed by Q3 close".
+    </p>
+
+    <table class="roadmap">
+      <thead>
+        <tr>
+          <th>Action</th>
+          <th>Owner</th>
+          <th>Priority</th>
+          <th>Target</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Split SoD roles in AP module (finding 01)</td>
+          <td>Finance Manager</td>
+          <td><span class="chip critical">Critical</span></td>
+          <td>Q2 close</td>
+        </tr>
+        <tr>
+          <td>Merge duplicate vendor records + uniqueness constraint (finding 02)</td>
+          <td>AP Lead</td>
+          <td><span class="chip critical">Critical</span></td>
+          <td>Q2 close</td>
+        </tr>
+        <tr>
+          <td>Add journal-approval workflow lock (finding 03)</td>
+          <td>Finance Manager</td>
+          <td><span class="chip high">High</span></td>
+          <td>Q3 mid</td>
+        </tr>
+        <tr>
+          <td>Deactivate dormant users + quarterly review (finding 04)</td>
+          <td>IT Lead</td>
+          <td><span class="chip high">High</span></td>
+          <td>Q3 mid</td>
+        </tr>
+        <tr>
+          <td>Split GL 4100 into child accounts (finding 05)</td>
+          <td>Finance Manager</td>
+          <td><span class="chip high">High</span></td>
+          <td>Q3 close</td>
+        </tr>
+        <tr>
+          <td>Standardise vendor payment terms (finding 06)</td>
+          <td>AP Lead</td>
+          <td><span class="chip high">High</span></td>
+          <td>Q3 close</td>
+        </tr>
+        <tr>
+          <td>PO confirmation reminders + escalation (finding 07)</td>
+          <td>Procurement</td>
+          <td><span class="chip medium">Medium</span></td>
+          <td>Q4 mid</td>
+        </tr>
+        <tr>
+          <td>Mandatory month-end FX revaluation (finding 08)</td>
+          <td>Finance Manager</td>
+          <td><span class="chip medium">Medium</span></td>
+          <td>Q4 mid</td>
+        </tr>
+        <tr>
+          <td>Training-complete gate on access provisioning (finding 09)</td>
+          <td>IT Lead</td>
+          <td><span class="chip medium">Medium</span></td>
+          <td>Q4 close</td>
+        </tr>
+        <tr>
+          <td>Move CFO dashboards to live data source (finding 10)</td>
+          <td>IT Lead</td>
+          <td><span class="chip low">Low</span></td>
+          <td>Y2 cycle</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer>
+    <div class="mark">Methodology · Scope · Contact</div>
+    <p>
+      Audit performed using the GAS Anomaly engine v2.4.1 over five working
+      days, ingesting five Sage X3 exports (GL, AP, PO, Users, Workflows)
+      covering the 12-month window 01 Apr 2025 — 31 Mar 2026. Sampling
+      methodology: full population for transaction-level findings, stratified
+      sampling for behavioural-pattern findings (1% sample, 95% CI).
+      Health-score model: equally-weighted four-pillar composite calibrated
+      against the Sage X3 travel-services reference benchmark.
+    </p>
+    <p>
+      Questions or to contest a finding: respond inside the portal via
+      "Ask Jera about this finding" on any risk-detail screen.
+    </p>
+  </footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="GAS">
+  <defs>
+    <radialGradient id="gasOrbGrad" cx="62%" cy="40%" r="70%">
+      <stop offset="0%" stop-color="#A78BFA"/>
+      <stop offset="45%" stop-color="#7C3AED"/>
+      <stop offset="100%" stop-color="#4C1D95"/>
+    </radialGradient>
+    <radialGradient id="gasCoreGrad" cx="30%" cy="28%" r="75%">
+      <stop offset="0%" stop-color="#E0E7FF"/>
+      <stop offset="35%" stop-color="#818CF8"/>
+      <stop offset="75%" stop-color="#6D28D9"/>
+      <stop offset="100%" stop-color="#4338CA"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Outer orb -->
+  <circle cx="32" cy="32" r="28" fill="url(#gasOrbGrad)"/>
+
+  <!-- Inner core sphere, offset right -->
+  <circle cx="41" cy="32" r="14" fill="url(#gasCoreGrad)"/>
+
+  <!-- Circuit wires entering from the left, each terminating at the core edge -->
+  <g stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <path d="M 7 20 L 20 20 L 27 24"/>
+    <path d="M 5 28 L 19 28 L 27 30"/>
+    <path d="M 5 36 L 23 36 L 28 36"/>
+    <path d="M 9 46 L 22 46 L 28 42"/>
+  </g>
+
+  <!-- Terminal dots on the core edge -->
+  <g fill="#FFFFFF">
+    <circle cx="28" cy="24" r="1.9"/>
+    <circle cx="28" cy="30" r="1.9"/>
+    <circle cx="29" cy="36" r="1.9"/>
+    <circle cx="29" cy="42" r="1.9"/>
+  </g>
+</svg>
