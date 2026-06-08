@@ -1,13 +1,10 @@
 import * as React from "react";
 import { useSearchParams, useLocation } from "react-router-dom";
+import { useClient } from "@/features/clients/ClientContext";
 import {
-  REPORTS,
-  REPORTS_DESC,
-  LATEST_REPORT_ID,
-  SEED_ENGAGEMENTS,
   priorReportOf,
   computeCumulative,
-} from "@/features/audit/fixture.active";
+} from "@/features/audit/report-helpers";
 import type {
   AuditReport,
   AuditUploadFile,
@@ -15,6 +12,7 @@ import type {
   EngagementFinding,
   CumulativeSummary,
 } from "@/features/audit/reports.fixture";
+import type { ClientInfo } from "@/features/clients/clients.data";
 
 // ============================================================================
 // REPORT CONTEXT — the global "which report am I looking at" provider.
@@ -37,6 +35,7 @@ export interface SubmitEngagementInput {
 }
 
 interface ReportContextValue {
+  clientInfo: ClientInfo;          // the active client's identity
   reports: AuditReport[];          // newest first
   selectedReport: AuditReport;
   selectedReportId: string;
@@ -69,18 +68,28 @@ interface ReportContextValue {
 
 const ReportContext = React.createContext<ReportContextValue | null>(null);
 
-function isValidReport(id: string | null): id is string {
-  return !!id && REPORTS.some((r) => r.id === id);
-}
-
 export function ReportProvider({ children }: { children: React.ReactNode }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
 
-  // Engagements seeded from fixture; mutated in-session on submit/save.
+  // Active client's data — ReportProvider is re-keyed by client in Providers,
+  // so this report set (and the seed below) is always the selected client's.
+  const {
+    reports,
+    reportsDesc,
+    latestReportId,
+    seedEngagements,
+    clientInfo,
+    clientSearch,
+  } = useClient();
+
+  const isValidReport = (id: string | null): id is string =>
+    !!id && reportsDesc.some((r) => r.id === id);
+
+  // Engagements seeded from the active client's fixture; mutated in-session.
   const [engagementsById, setEngagementsById] = React.useState<
     Record<string, Engagement>
-  >(() => ({ ...SEED_ENGAGEMENTS }));
+  >(() => ({ ...seedEngagements }));
 
   // ── Selected report — URL-driven, but DURABLE across naked navigations ────
   //
@@ -93,7 +102,7 @@ export function ReportProvider({ children }: { children: React.ReactNode }) {
   const urlReportId = searchParams.get("report");
 
   const [rememberedReportId, setRememberedReportId] = React.useState<string>(
-    () => (isValidReport(urlReportId) ? urlReportId : LATEST_REPORT_ID),
+    () => (isValidReport(urlReportId) ? urlReportId : latestReportId),
   );
 
   const selectedReportId = isValidReport(urlReportId)
@@ -108,18 +117,23 @@ export function ReportProvider({ children }: { children: React.ReactNode }) {
   }, [urlReportId, rememberedReportId]);
 
   // SELF-HEAL: if the path lost the report param, rewrite it from memory.
-  // replace:true → no history spam; the screen already renders selectedReportId
-  // so there is no flash back to the latest cycle.
+  // Functional updater so it merges onto the latest params and never clobbers
+  // ClientContext's parallel ?client= self-heal. replace:true → no history spam.
   React.useEffect(() => {
     if (!isValidReport(urlReportId)) {
-      const next = new URLSearchParams(searchParams);
-      next.set("report", selectedReportId);
-      setSearchParams(next, { replace: true });
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          next.set("report", selectedReportId);
+          return next;
+        },
+        { replace: true },
+      );
     }
-  }, [location.pathname, urlReportId, selectedReportId, searchParams, setSearchParams]);
+  }, [location.pathname, urlReportId, selectedReportId, setSearchParams]);
 
   const selectedReport =
-    REPORTS.find((r) => r.id === selectedReportId) ?? REPORTS_DESC[0];
+    reportsDesc.find((r) => r.id === selectedReportId) ?? reportsDesc[0];
 
   const selectReport = React.useCallback(
     (id: string) => {
@@ -137,7 +151,7 @@ export function ReportProvider({ children }: { children: React.ReactNode }) {
     [setSearchParams],
   );
 
-  const isLatest = selectedReportId === LATEST_REPORT_ID;
+  const isLatest = selectedReportId === latestReportId;
   const isHistorical = !isLatest;
   const engagement = engagementsById[selectedReportId] ?? null;
 
@@ -154,7 +168,7 @@ export function ReportProvider({ children }: { children: React.ReactNode }) {
   // behind the UI, which already hides every edit affordance off the latest.
   const submitEngagement = React.useCallback(
     (input: SubmitEngagementInput) => {
-      if (selectedReportId !== LATEST_REPORT_ID) return;
+      if (selectedReportId !== latestReportId) return;
       setEngagementsById((prev) => ({
         ...prev,
         [selectedReportId]: {
@@ -174,7 +188,7 @@ export function ReportProvider({ children }: { children: React.ReactNode }) {
 
   const saveDraft = React.useCallback(
     (input: SubmitEngagementInput) => {
-      if (selectedReportId !== LATEST_REPORT_ID) return;
+      if (selectedReportId !== latestReportId) return;
       setEngagementsById((prev) => ({
         ...prev,
         [selectedReportId]: {
@@ -194,8 +208,8 @@ export function ReportProvider({ children }: { children: React.ReactNode }) {
 
   // ── Derived ──────────────────────────────────────────────────────────────
   const priorReport = React.useMemo(
-    () => priorReportOf(selectedReportId),
-    [selectedReportId],
+    () => priorReportOf(reportsDesc, selectedReportId),
+    [reportsDesc, selectedReportId],
   );
 
   const priorEngagement = priorReport
@@ -203,19 +217,23 @@ export function ReportProvider({ children }: { children: React.ReactNode }) {
     : null;
 
   const cumulative = React.useMemo(
-    () => computeCumulative(engagementsById),
-    [engagementsById],
+    () => computeCumulative(reportsDesc, engagementsById),
+    [reportsDesc, engagementsById],
   );
 
-  const reportSearch = `?report=${selectedReportId}`;
+  // Links carry BOTH the client and the report so navigation stays scoped to
+  // one client + one cycle (and URLs stay shareable). The contexts self-heal
+  // if either param is ever dropped.
+  const reportSearch = `?${clientSearch}&report=${selectedReportId}`;
   const linkWithReport = React.useCallback(
     (path: string) =>
-      `${path}${path.includes("?") ? "&" : "?"}report=${selectedReportId}`,
-    [selectedReportId],
+      `${path}${path.includes("?") ? "&" : "?"}${clientSearch}&report=${selectedReportId}`,
+    [clientSearch, selectedReportId],
   );
 
   const value: ReportContextValue = {
-    reports: REPORTS_DESC,
+    clientInfo,
+    reports: reportsDesc,
     selectedReport,
     selectedReportId,
     selectReport,

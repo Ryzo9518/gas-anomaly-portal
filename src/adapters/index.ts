@@ -6,9 +6,12 @@
 // surface stays narrow and discoverable.
 
 import type { AuthPort } from "@/ports/auth.port";
+import type { ClientsPort } from "@/ports/clients.port";
 import { authMock } from "./mock/auth.mock";
+import { clientsMock } from "./mock/clients.mock";
 
 export type AdapterKind = "mock";
 export const CURRENT_ADAPTER: AdapterKind = "mock";
 
 export const auth: AuthPort = authMock;
+export const clients: ClientsPort = clientsMock;

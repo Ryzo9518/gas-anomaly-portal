@@ -8,6 +8,7 @@ import {
 import { flags, isActive, isLocked, isStub } from "@/flags/flags";
 import logoUrl from "@/assets/brand/logo.png";
 import { SidebarBg } from "./SidebarBg";
+import { ClientSwitcher } from "./ClientSwitcher";
 import { useReport } from "@/features/audit/ReportContext";
 import { useUIStore } from "@/state/uiStore";
 import { useAuthStore } from "@/state/authStore";
@@ -311,6 +312,11 @@ export function Sidebar() {
           </TooltipContent>
         </Tooltip>
       </div>
+
+      {/* Client switcher — internal (all-clients) builds show a selector here;
+          scoped per-client builds show the client name as a static label;
+          hidden when the sidebar is collapsed. */}
+      <ClientSwitcher collapsed={collapsed} />
 
       <nav
         className={cn(

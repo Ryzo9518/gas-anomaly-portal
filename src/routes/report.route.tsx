@@ -7,7 +7,6 @@ import { Button } from "@/ui/Button";
 import { Card } from "@/ui/Card";
 import { PageStickyHeader } from "@/shell/PageStickyHeader";
 import { useReport } from "@/features/audit/ReportContext";
-import { CLIENT_INFO } from "@/features/audit/audit.fixture";
 
 const REPORT_URL = "/mock-report/clientA_audit_2026Q1.html";
 
@@ -21,7 +20,7 @@ function formatDate(iso: string): string {
 
 export function ReportRoute() {
   const navigate = useNavigate();
-  const { selectedReport, engagement, isHistorical, linkWithReport } = useReport();
+  const { clientInfo, selectedReport, engagement, isHistorical, linkWithReport } = useReport();
 
   const eng = engagement;
 
@@ -46,7 +45,7 @@ export function ReportRoute() {
           <div className="max-w-2xl">
             <h1 className="text-display text-slate-900">Audit Report</h1>
             <p className="text-body text-slate-500 mt-0.5">
-              {selectedReport.cycleLabel} &middot; {CLIENT_INFO.name}
+              {selectedReport.cycleLabel} &middot; {clientInfo.name}
             </p>
           </div>
 
