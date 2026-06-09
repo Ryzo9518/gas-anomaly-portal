@@ -17,11 +17,15 @@ from pydantic import BaseModel
 from sqlalchemy import update
 from sqlalchemy.orm import Session
 
+from sqlalchemy import select
+
 from .config import settings
 from .db import get_db
 from .deps import current_client
+from .invites import issue_and_send_invite
 from .models import (
     CONTACT_ACTIVE,
+    CONTACT_REVOKED,
     DELIVERY_SENT,
     AuditLog,
     Client,
@@ -29,6 +33,7 @@ from .models import (
     Contact,
     Invite,
 )
+from .ratelimit import check_and_increment
 from .tokens import hash_token
 
 router = APIRouter(prefix="/api/auth/client", tags=["client-auth"])
@@ -113,6 +118,47 @@ def client_session(ctx: dict | None = Depends(current_client)):
     if not ctx:
         return None
     return {"clientId": ctx["client_id"], "email": ctx["email"], "role": "client"}
+
+
+class RelinkBody(BaseModel):
+    email: str
+
+
+@router.post("/relink")
+def relink(body: RelinkBody, request: Request, db: Session = Depends(get_db)):
+    """Self-service re-link (R8/R16). Sends a fresh link for every active,
+    non-revoked contact matching the email (one per client they belong to).
+    Rate-limited per email + per IP. Returns an identical generic response
+    regardless of whether the email is registered (no account enumeration)."""
+    email = body.email.strip().lower()
+    ip = request.client.host if request.client else "unknown"
+
+    allowed = check_and_increment(
+        db, f"relink:email:{email}", limit=3, window_seconds=900
+    ) and check_and_increment(
+        db, f"relink:ip:{ip}", limit=10, window_seconds=900
+    )
+
+    if allowed:
+        contacts = db.scalars(
+            select(Contact).where(
+                Contact.email == email,
+                Contact.revoked_at.is_(None),
+                Contact.status != CONTACT_REVOKED,
+            )
+        ).all()
+        for ct in contacts:
+            client = db.get(Client, ct.client_id)
+            if client and client.revoked_at is None:
+                try:
+                    issue_and_send_invite(db, ct, client, ip=ip)
+                except Exception:
+                    pass  # never reveal per-recipient outcome
+        if contacts:
+            db.add(AuditLog(event="relink_requested", actor=email, ip=ip))
+    db.commit()
+    # Identical response in all cases.
+    return {"ok": True, "message": "If your email is registered, a link has been sent."}
 
 
 @router.post("/logout")

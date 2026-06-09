@@ -6,7 +6,7 @@ import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
 
@@ -160,3 +160,60 @@ def resend_invite(
         status = "failed"
     db.commit()
     return {"email": contact.email, "status": status}
+
+
+def _revoke_sessions(db: Session, *, contact_id=None, client_id=None) -> None:
+    now = dt.datetime.now(dt.timezone.utc)
+    stmt = update(ClientSession).where(ClientSession.revoked_at.is_(None))
+    if contact_id is not None:
+        stmt = stmt.where(ClientSession.contact_id == contact_id)
+    if client_id is not None:
+        stmt = stmt.where(ClientSession.client_id == client_id)
+    db.execute(stmt.values(revoked_at=now))
+
+
+@router.post("/contacts/{contact_id}/revoke")
+def revoke_contact(
+    contact_id: str,
+    admin: dict = Depends(current_admin),
+    db: Session = Depends(get_db),
+):
+    contact = db.get(Contact, _uid(contact_id))
+    if not contact:
+        raise HTTPException(404, {"error": "not found", "code": "not_found"})
+    now = dt.datetime.now(dt.timezone.utc)
+    contact.revoked_at = now
+    contact.status = CONTACT_REVOKED
+    _revoke_sessions(db, contact_id=contact.id)  # kill live sessions immediately
+    db.add(
+        AuditLog(
+            event="contact_revoked",
+            actor=admin["email"],
+            target_contact_id=contact.id,
+            target_client_id=contact.client_id,
+        )
+    )
+    db.commit()
+    return {"ok": True}
+
+
+@router.post("/clients/{client_id}/revoke")
+def revoke_client(
+    client_id: str,
+    admin: dict = Depends(current_admin),
+    db: Session = Depends(get_db),
+):
+    client = db.get(Client, _uid(client_id))
+    if not client:
+        raise HTTPException(404, {"error": "not found", "code": "not_found"})
+    now = dt.datetime.now(dt.timezone.utc)
+    client.revoked_at = now
+    for ct in client.contacts:
+        ct.revoked_at = now
+        ct.status = CONTACT_REVOKED
+    _revoke_sessions(db, client_id=client.id)
+    db.add(
+        AuditLog(event="client_revoked", actor=admin["email"], target_client_id=client.id)
+    )
+    db.commit()
+    return {"ok": True}
