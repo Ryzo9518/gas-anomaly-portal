@@ -25,6 +25,7 @@ os.environ.setdefault("SESSION_SECRET", "test-session-secret-0123456789abcdef")
 os.environ.setdefault("ALLOWED_STAFF_EMAILS", "admin@jera.co.za,staff@jera.co.za")
 os.environ.setdefault("ADMIN_EMAILS", "admin@jera.co.za")
 os.environ.setdefault("DATABASE_URL", TEST_DB_URL)
+os.environ.setdefault("COOKIE_SECURE", "false")  # http test client can't keep Secure cookies
 
 from app.models import Base  # noqa: E402
 
