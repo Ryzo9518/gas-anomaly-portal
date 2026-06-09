@@ -13,12 +13,16 @@ src/
 │   └── Router.tsx                  Route definitions
 │
 ├── routes/                         One file per URL. All import useReport().
-│   ├── login.route.tsx             /login — mock auth flow
+│   ├── login.route.tsx             /login — staff auth flow
+│   ├── authCallback.route.tsx      /auth/callback — OAuth redirect handler (restores session from cookie)
+│   ├── clientVerify.route.tsx      /auth/verify — client magic-link redemption
 │   ├── dashboard.route.tsx         /dashboard — KPI cards + YoY card
 │   ├── findings.route.tsx          /findings — findings table + Plan column
 │   ├── engagement.route.tsx        /engagement — builder or locked view
 │   ├── findingDetail.route.tsx     /findings/:rank — individual finding drill-down
-│   └── upload.route.tsx            /upload — archive view or new-cycle intake
+│   ├── upload.route.tsx            /upload — archive view or new-cycle intake
+│   ├── report.route.tsx            /report — embedded static report viewer
+│   └── admin.clients.route.tsx     /admin/clients — Jera admin client management (admin-only)
 │
 ├── shell/                          App chrome — visible on every screen
 │   ├── AppLayout.tsx               Sidebar + TopBar + main content wrapper

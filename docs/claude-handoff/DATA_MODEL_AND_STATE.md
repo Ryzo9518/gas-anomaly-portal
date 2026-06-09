@@ -146,7 +146,7 @@ interface CumulativeSummary {
 }
 ```
 
-Computed by `computeCumulative(engagementsById)` in `ReportContext`. Runs on every render.
+Computed by `computeCumulative(reportsDesc, engagementsById)` in `ReportContext`. Runs on every render.
 
 ---
 
@@ -189,8 +189,8 @@ export const REPORTS_DESC: AuditReport[];   // newest first (used by the selecto
 export const LATEST_REPORT_ID: string;      // "2026"
 export const SEED_ENGAGEMENTS: Record<string, Engagement>;
 
-export function priorReportOf(id: string): AuditReport | null;
-export function computeCumulative(engagementsById: Record<string, Engagement>): CumulativeSummary;
+export function priorReportOf(reportsDesc: AuditReport[], id: string): AuditReport | null;
+export function computeCumulative(reportsDesc: AuditReport[], engagementsById: Record<string, Engagement>): CumulativeSummary;
 export function totalRisks(r: Record<Severity, number>): number;
 export function severeRisks(r: Record<Severity, number>): number;
 ```
