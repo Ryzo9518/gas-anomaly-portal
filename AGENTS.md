@@ -68,6 +68,15 @@ cumulative KPI stays live, plan column toggles, URL shareability).
 
 `5199` is the project's standing dev/preview port (see `.claude/launch.json`).
 
+**Local enforcement (sanctioned, not CI).** Gates 1–2 are enforced automatically
+by a local pre-commit hook (`.githooks/pre-commit`, wired by `npm run prepare` via
+`git config core.hooksPath`). This is local-only enforcement and is consistent with
+the no-GitHub-Actions rule in §4 — it is the *approved* substitute for cloud CI, not
+an exception to it. A clone activates the hook on first `npm install`; no manual step.
+Gate 3 and `verify:isolation` cannot be machine-checked at commit time and remain the
+committer's responsibility — see the one-screen `docs/claude-handoff/PRE_PR_CHECKLIST.md`
+(mirrored into every PR by `.github/pull_request_template.md`).
+
 ---
 
 ## 4. Conventions (binding)
@@ -92,8 +101,11 @@ cumulative KPI stays live, plan column toggles, URL shareability).
   - Related lesson: [LESSON-N]   (if applicable)
   ```
 - **CI policy — GitHub Actions are NOT used (standing rule).** Quality gates run
-  locally before commit. Do not add `.github/workflows/` without an explicit,
-  recorded decision to amend this law.
+  locally before commit, enforced by the pre-commit hook described in §3. Do not add
+  `.github/workflows/` without an explicit, recorded decision to amend this law. Note
+  that the local hook (`.githooks/`) and the PR template (`.github/pull_request_template.md`)
+  are **not** Actions — they run on the developer's machine / in the PR body, never on
+  GitHub's runners — and are therefore permitted under this rule.
 
 ---
 
