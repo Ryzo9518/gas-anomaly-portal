@@ -89,8 +89,8 @@ const FINDINGS_2026: AuditFinding[] = [
 ];
 
 export const REPORTS: AuditReport[] = [
-  { id: "2024", shortLabel: "2024", cycleLabel: "2024 Baseline Audit", status: "complete", completedAt: "2024-05-20", healthScore: 39, leakageEstimate: 2_100_000, leakageRecoverable: 1_360_000, risks: { critical: 3, high: 4, medium: 3, low: 1 }, findings: FINDINGS_2024, uploadSubmittedAt: "2024-05-08", uploads: uploads("2024", "2024-05-10") },
-  { id: "2025", shortLabel: "2025", cycleLabel: "2025 Annual Audit", status: "complete", completedAt: "2025-05-19", healthScore: 51, leakageEstimate: 1_500_000, leakageRecoverable: 940_000, risks: { critical: 0, high: 3, medium: 3, low: 2 }, findings: FINDINGS_2025, uploadSubmittedAt: "2025-05-05", uploads: uploads("2025", "2025-05-07") },
+  { id: "2024", shortLabel: "2024", cycleLabel: "2024 Baseline Audit", status: "complete", completedAt: "2024-05-20", healthScore: 39, leakageEstimate: 2_100_000, leakageRecoverable: 1_360_000, risks: { critical: 4, high: 6, medium: 3, low: 1 }, findings: FINDINGS_2024, uploadSubmittedAt: "2024-05-08", uploads: uploads("2024", "2024-05-10") },
+  { id: "2025", shortLabel: "2025", cycleLabel: "2025 Annual Audit", status: "complete", completedAt: "2025-05-19", healthScore: 51, leakageEstimate: 1_500_000, leakageRecoverable: 940_000, risks: { critical: 1, high: 6, medium: 3, low: 2 }, findings: FINDINGS_2025, uploadSubmittedAt: "2025-05-05", uploads: uploads("2025", "2025-05-07") },
   { id: "2026", shortLabel: "2026", cycleLabel: "2026 Annual Audit", status: "complete", completedAt: "2026-06-09", healthScore: 58, leakageEstimate: 1_100_000, leakageRecoverable: 700_000, risks: { critical: 0, high: 5, medium: 4, low: 3 }, findings: FINDINGS_2026, uploadSubmittedAt: "2026-05-28", uploads: uploads("2026", "2026-05-30") },
 ];
 
