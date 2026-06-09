@@ -17,3 +17,6 @@ dist/
 Thumbs.db
 .idea/
 .vscode/
+
+# Scoped/per-client build outputs
+dist-*/
