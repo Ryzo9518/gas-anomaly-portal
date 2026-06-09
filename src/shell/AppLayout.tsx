@@ -7,6 +7,8 @@ import { CommandBar } from "./CommandBar";
 import { PageTransition } from "./PageTransition";
 import { SplashScreen } from "./SplashScreen";
 import { RouteProgressBar } from "./RouteProgressBar";
+import { useReport } from "@/features/audit/ReportContext";
+import { NoAuditDataState } from "@/features/clients/NoAuditDataState";
 
 // Surgical clean (2026-06-05): CommercialOverlayDrawer + ProspectReviewDialog
 // + ScenarioSwitcher imports removed along with the deal-stage features they
@@ -21,9 +23,16 @@ export function AppLayout() {
   // PageTransition fades the new content in (no visible upward drift).
   const mainRef = React.useRef<HTMLElement>(null);
   const { pathname } = useLocation();
+  const { hasReports } = useReport();
   React.useEffect(() => {
     mainRef.current?.scrollTo({ top: 0, behavior: "instant" });
   }, [pathname]);
+
+  // Audit screens (dashboard/report/findings/engagement/upload) read a selected
+  // report and would render empty/crash when the client has no data. The admin
+  // Clients screen is exempt — it manages its own list and must stay reachable
+  // so the first client (and its data) can be created.
+  const showNoAuditData = !hasReports && !pathname.startsWith("/admin");
 
   return (
     // `isolate` (CSS isolation: isolate) creates a fresh stacking
@@ -84,7 +93,7 @@ export function AppLayout() {
           {/* PageTransition fades + slides each route mount so navigations
               feel orchestrated rather than abrupt. */}
           <PageTransition>
-            <Outlet />
+            {showNoAuditData ? <NoAuditDataState /> : <Outlet />}
           </PageTransition>
         </main>
       </div>

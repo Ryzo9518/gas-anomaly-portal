@@ -37,7 +37,7 @@ export interface AuthActor {
 export interface SessionPatch {
   jwt?: string | null;
   expiresAt?: number | null;
-  client_id?: number | null;
+  client_id?: string | null;
   actor?: AuthActor | null;
   isOpenSession?: boolean;
 }
@@ -45,7 +45,9 @@ export interface SessionPatch {
 interface AuthState {
   jwt: string | null;
   expiresAt: number | null;     // epoch ms; null when no JWT issued
-  client_id: number | null;     // resolved from JWT claims, server-side
+  client_id: string | null;     // canonical client UUID (string) — matches the
+                                // backend + the clients port; resolved from the
+                                // session, server-side
   actor: AuthActor | null;
   isOpenSession: boolean;        // mirrors Session.isOpenSession
 

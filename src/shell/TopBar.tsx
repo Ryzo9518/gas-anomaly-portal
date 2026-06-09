@@ -32,9 +32,13 @@ const ENG_BADGE: Record<EngagementStatus, { label: string; cls: string }> = {
 };
 
 function ReportSelector() {
-  const { reports, selectedReport, selectedReportId, selectReport, engagementsById, isHistorical } =
+  const { reports, selectedReport, selectedReportId, selectReport, engagementsById, isHistorical, hasReports } =
     useReport();
   const [searchParams] = useSearchParams();
+
+  // No audit reports for this client yet → no report to switch between; hide the
+  // pill entirely (the workspace shows the no-data empty state instead).
+  if (!hasReports) return null;
 
   // When setting up a new audit cycle, advance the year by 1 and switch label to "New"
   const isNewCycle = searchParams.get("mode") === "new";
