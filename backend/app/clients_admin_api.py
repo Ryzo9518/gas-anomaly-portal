@@ -129,6 +129,28 @@ def list_clients(
     return out
 
 
+@router.get("/clients/{client_id}/reports")
+def client_reports(
+    client_id: str,
+    admin: dict = Depends(current_admin),
+    db: Session = Depends(get_db),
+) -> list[dict]:
+    """A single client's audit payload, for STAFF viewing in the internal portal
+    (the staff switcher's data source — lets an admin see any client's audit and
+    verify a loaded client before retiring its passcode site).
+
+    Admin-scoped (current_admin → 403 for non-admins, never a client cookie).
+    Unlike the client-facing /api/reports, this is NOT gated by
+    ISOLATION_VERIFIED: staff are the auditors and must be able to view real data
+    in order to verify isolation before the client-facing gate is opened. Returns
+    [] when the client has no data loaded yet (the empty-workspace state)."""
+    client = db.get(Client, _uid(client_id))
+    if not client or client.revoked_at is not None:
+        raise HTTPException(404, {"error": "client not found", "code": "not_found"})
+    data = db.get(ClientData, client.id)
+    return data.payload if data and data.payload else []
+
+
 @router.post("/clients/{client_id}/contacts")
 def invite_contacts(
     client_id: str,
