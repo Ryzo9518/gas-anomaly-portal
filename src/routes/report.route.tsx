@@ -8,7 +8,14 @@ import { Card } from "@/ui/Card";
 import { PageStickyHeader } from "@/shell/PageStickyHeader";
 import { useReport } from "@/features/audit/ReportContext";
 
-const REPORT_URL = "/mock-report/clientA_audit_2026Q1.html";
+// Per-client standalone report document. Keyed on client name (the report route
+// has clientInfo.name in scope). View-only resolution — does NOT touch the data
+// contract. LOJAF carries its real GAS X3 audit; unmapped clients fall back to
+// the shared default doc (the same one Tourvest renders).
+const DEFAULT_REPORT_URL = "/mock-report/clientA_audit_2026Q1.html";
+const REPORT_URL_BY_CLIENT: Record<string, string> = {
+  "LOJAF Pty Ltd": "/mock-report/lojaf_audit_2026.html",
+};
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString("en-ZA", {
@@ -23,6 +30,8 @@ export function ReportRoute() {
   const { selectedReport, engagement, isHistorical, linkWithReport, clientInfo } = useReport();
 
   const eng = engagement;
+
+  const reportUrl = REPORT_URL_BY_CLIENT[clientInfo.name] ?? DEFAULT_REPORT_URL;
 
   // Determine the engagement CTA for the header button row.
   const engCta = (() => {
@@ -63,7 +72,7 @@ export function ReportRoute() {
             <Button
               variant="primary"
               size="sm"
-              onClick={() => window.open(REPORT_URL, "_blank")}
+              onClick={() => window.open(reportUrl, "_blank")}
             >
               <Download className="h-3.5 w-3.5" />
               Download HTML
@@ -106,7 +115,7 @@ export function ReportRoute() {
             </span>
           </div>
           <iframe
-            src={REPORT_URL}
+            src={reportUrl}
             title="Audit report"
             className="block w-full h-[80vh] bg-slate-50"
             sandbox="allow-same-origin"
