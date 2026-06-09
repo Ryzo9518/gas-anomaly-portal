@@ -1,5 +1,5 @@
 // ============================================================================
-// REPORTS FIXTURE — ASSET MANAGEMENT demo client (Meridian Capital Partners).
+// REPORTS FIXTURE — ASSET MANAGEMENT demo client (Tourvest Travel Group).
 //
 // Mirrors the shape and conventions of reports.fixture.ts (Tourvest) exactly —
 // three cycles oldest→newest, one live (2026) engagement the client builds,
@@ -21,18 +21,18 @@ import type {
 
 // ── Client identity ──────────────────────────────────────────────────────────
 export const CLIENT_INFO = {
-  name: "Meridian Capital Partners",
+  name: "Tourvest Travel Group",
   healthTarget: 82,
 };
 
 // ── Shared upload sets (the five Sage X3 exports per cycle) ──────────────────
 function uploads(year: string, submitted: string): AuditUploadFile[] {
   return [
-    { fileType: "gl", fileTypeLabel: "General Ledger", fileTypeDescription: "GACCENTRY / GACCENTRYD journal lines", filename: `meridian_gl_${year}.csv`, rows: 184_322, sizeBytes: 41_200_000, state: "passed", submittedAt: submitted },
-    { fileType: "ap", fileTypeLabel: "Accounts Payable", fileTypeDescription: "BPSUPPLIER + PINVOICE open items", filename: `meridian_ap_${year}.csv`, rows: 22_104, sizeBytes: 6_900_000, state: "passed", submittedAt: submitted },
-    { fileType: "po", fileTypeLabel: "Purchase Orders", fileTypeDescription: "PORDER / PORDERQ commitment lines", filename: `meridian_po_${year}.csv`, rows: 9_842, sizeBytes: 3_100_000, state: "passed", submittedAt: submitted },
-    { fileType: "users", fileTypeLabel: "User & Access", fileTypeDescription: "AUTILIS menu × function profiles", filename: `meridian_users_${year}.csv`, rows: 318, sizeBytes: 240_000, state: "passed", submittedAt: submitted },
-    { fileType: "workflows", fileTypeLabel: "Workflow & Approvals", fileTypeDescription: "AWRKHISTO approval trail", filename: `meridian_wf_${year}.csv`, rows: 14_550, sizeBytes: 2_400_000, state: "passed", submittedAt: submitted },
+    { fileType: "gl", fileTypeLabel: "General Ledger", fileTypeDescription: "GACCENTRY / GACCENTRYD journal lines", filename: `tourvest_gl_${year}.csv`, rows: 184_322, sizeBytes: 41_200_000, state: "passed", submittedAt: submitted },
+    { fileType: "ap", fileTypeLabel: "Accounts Payable", fileTypeDescription: "BPSUPPLIER + PINVOICE open items", filename: `tourvest_ap_${year}.csv`, rows: 22_104, sizeBytes: 6_900_000, state: "passed", submittedAt: submitted },
+    { fileType: "po", fileTypeLabel: "Purchase Orders", fileTypeDescription: "PORDER / PORDERQ commitment lines", filename: `tourvest_po_${year}.csv`, rows: 9_842, sizeBytes: 3_100_000, state: "passed", submittedAt: submitted },
+    { fileType: "users", fileTypeLabel: "User & Access", fileTypeDescription: "AUTILIS menu × function profiles", filename: `tourvest_users_${year}.csv`, rows: 318, sizeBytes: 240_000, state: "passed", submittedAt: submitted },
+    { fileType: "workflows", fileTypeLabel: "Workflow & Approvals", fileTypeDescription: "AWRKHISTO approval trail", filename: `tourvest_wf_${year}.csv`, rows: 14_550, sizeBytes: 2_400_000, state: "passed", submittedAt: submitted },
   ];
 }
 
