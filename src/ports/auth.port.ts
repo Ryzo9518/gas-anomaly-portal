@@ -7,6 +7,9 @@ export interface Session {
   displayName: string;
   userName: string;
   isOpenSession?: boolean;
+  // True for staff on the admin allow-list (R1). Drives admin-only UI gating;
+  // the backend independently enforces admin access on every admin route.
+  isAdmin?: boolean;
 }
 
 // Object-shaped credentials so future fields (MFA token, captcha) extend

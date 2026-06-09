@@ -26,6 +26,7 @@ export interface AuthActor {
   userId: string;
   displayName: string;
   userName: string;
+  isAdmin?: boolean;
 }
 
 // Patch shape used by setSession(). Each field is optional so the bff
@@ -64,6 +65,7 @@ function actorFromSession(s: Session): AuthActor {
     userId: s.userId,
     displayName: s.displayName,
     userName: s.userName,
+    isAdmin: s.isAdmin,
   };
 }
 

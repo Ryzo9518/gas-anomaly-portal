@@ -42,6 +42,7 @@ def session(request: Request, staff: dict | None = Depends(current_staff)):
         "userName": staff["name"],
         "email": staff["email"],
         "role": "staff",
+        "isAdmin": bool(staff.get("is_admin")),
     }
 
 

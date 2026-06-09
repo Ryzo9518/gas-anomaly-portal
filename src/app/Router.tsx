@@ -24,6 +24,22 @@ function RequireAuth() {
   return <Outlet />;
 }
 
+// Admin-only gate (R1). Non-admins are redirected to the dashboard with no
+// error surface — the absence of the admin nav is the only signal (a 403 page
+// would advertise the route). The backend independently enforces admin access
+// on every admin API route; this is UI gating only. Used by the Unit 9 admin
+// route.
+export function RequireAdmin() {
+  const actor = useAuthStore((s) => s.actor);
+  if (!actor) {
+    return <Navigate to="/login" replace />;
+  }
+  if (!actor.isAdmin) {
+    return <Navigate to="/dashboard" replace />;
+  }
+  return <Outlet />;
+}
+
 export function Router() {
   return (
     <Routes>

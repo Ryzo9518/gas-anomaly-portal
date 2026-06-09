@@ -11,12 +11,22 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from app.models import Base
-
 TEST_DB_URL = os.environ.get(
     "GAS_PORTAL_TEST_DATABASE_URL",
     "postgresql+psycopg://localhost/gas_portal_test",
 )
+
+# Default env so modules that import app.config (security/deps/main) load in
+# tests without the real runtime secrets. Set before any app.* import.
+os.environ.setdefault("ENTRA_TENANT_ID", "test-tenant")
+os.environ.setdefault("ENTRA_CLIENT_ID", "test-client")
+os.environ.setdefault("ENTRA_CLIENT_SECRET", "test-secret")
+os.environ.setdefault("SESSION_SECRET", "test-session-secret-0123456789abcdef")
+os.environ.setdefault("ALLOWED_STAFF_EMAILS", "admin@jera.co.za,staff@jera.co.za")
+os.environ.setdefault("ADMIN_EMAILS", "admin@jera.co.za")
+os.environ.setdefault("DATABASE_URL", TEST_DB_URL)
+
+from app.models import Base  # noqa: E402
 
 
 @pytest.fixture(scope="session")
