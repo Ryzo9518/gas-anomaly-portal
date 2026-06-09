@@ -1,0 +1,49 @@
+name: Quality Gates
+
+# Server-side enforcement of AGENTS.md §3 quality gates.
+# Added by recorded decision of the repository owner (2026-06-09), amending the
+# former no-Actions rule in AGENTS.md §4. Scope: VALIDATION ONLY — this workflow
+# never deploys. Deployment to Hetzner stays the manual runbook process (§6).
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+# A newer push to the same ref cancels the in-progress run.
+concurrency:
+  group: quality-gates-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  gates:
+    name: typecheck · build · test · isolation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Gate 1 — TypeScript strict (tsc --noEmit)
+        run: npm run typecheck
+
+      - name: Gate 2 — production build
+        run: npm run build
+
+      - name: Unit tests (vitest)
+        run: npm test
+
+      - name: Client isolation — no cross-client data in the bundle
+        run: npm run verify:isolation
