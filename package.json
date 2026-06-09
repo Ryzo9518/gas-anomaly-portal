@@ -7,6 +7,7 @@
     "**/*.css"
   ],
   "scripts": {
+    "prepare": "git config core.hooksPath .githooks || true",
     "dev": "vite",
     "dev:internal": "vite",
     "dev:newclient": "VITE_CLIENT=newclient vite",
