@@ -23,7 +23,8 @@ from .models import (
 
 
 def _link(raw_token: str) -> str:
-    return f"{settings.app_base_url}/#/auth/verify?token={raw_token}"
+    # Points at the client-portal build (magic-link login), not the staff root.
+    return f"{settings.client_portal_base_url}/#/auth/verify?token={raw_token}"
 
 
 def issue_and_send_invite(
