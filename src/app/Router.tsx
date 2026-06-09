@@ -5,7 +5,9 @@ import { useAuthStore } from "@/state/authStore";
 
 import { DashboardRoute } from "@/routes/dashboard.route";
 import { LoginRoute } from "@/routes/login.route";
+import { ClientLogin } from "@/features/login/ClientLogin";
 import { AuthCallbackRoute } from "@/routes/authCallback.route";
+import { ClientVerifyRoute } from "@/routes/clientVerify.route";
 import { UploadRoute } from "@/routes/upload.route";
 import { ReportRoute } from "@/routes/report.route";
 import { FindingsRoute } from "@/routes/findings.route";
@@ -40,11 +42,20 @@ export function RequireAdmin() {
   return <Outlet />;
 }
 
+// Client-portal build (VITE_AUTH=client) uses the passwordless client login;
+// otherwise the staff Microsoft login. Build-time literal so the unused login
+// surface tree-shakes out.
+const IS_CLIENT_PORTAL = import.meta.env.VITE_AUTH === "client";
+
 export function Router() {
   return (
     <Routes>
-      <Route path="/login" element={<LoginRoute />} />
+      <Route
+        path="/login"
+        element={IS_CLIENT_PORTAL ? <ClientLogin /> : <LoginRoute />}
+      />
       <Route path="/auth/callback" element={<AuthCallbackRoute />} />
+      <Route path="/auth/verify" element={<ClientVerifyRoute />} />
       <Route element={<RequireAuth />}>
         <Route element={<AppLayout />}>
           <Route index element={<Navigate to="/dashboard" replace />} />

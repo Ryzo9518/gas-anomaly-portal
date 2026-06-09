@@ -9,6 +9,7 @@ import type { AuthPort } from "@/ports/auth.port";
 import type { ClientsPort } from "@/ports/clients.port";
 import { authMock } from "./mock/auth.mock";
 import { authBff } from "./bff/auth.bff";
+import { authClientBff } from "./bff/auth.client.bff";
 import { clientsMock } from "./mock/clients.mock";
 import { clientsBff } from "./bff/clients.bff";
 
@@ -28,7 +29,16 @@ export const CURRENT_ADAPTER: AdapterKind =
 export const DATA_ADAPTER: AdapterKind =
   (import.meta.env.VITE_DATA_ADAPTER as AdapterKind) === "bff" ? "bff" : "mock";
 
-export const auth: AuthPort = CURRENT_ADAPTER === "bff" ? authBff : authMock;
+// AUTH selection (build-time literals so unused adapters tree-shake):
+//   • VITE_AUTH=client  → client-portal build (magic-link), regardless of VITE_ADAPTER
+//   • else VITE_ADAPTER=bff → staff Microsoft SSO
+//   • else                 → mock (demo/offline)
+export const auth: AuthPort =
+  (import.meta.env.VITE_AUTH as string) === "client"
+    ? authClientBff
+    : CURRENT_ADAPTER === "bff"
+      ? authBff
+      : authMock;
 
 // Use the env literal DIRECTLY in the ternary (not the exported DATA_ADAPTER
 // const). Vite replaces import.meta.env.VITE_DATA_ADAPTER with a string literal
