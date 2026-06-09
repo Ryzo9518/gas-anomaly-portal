@@ -26,6 +26,11 @@ class Settings(BaseSettings):
     # in the tenant the app registration lives in.
     graph_sender: str = "anomaly@jera.co.za"
 
+    # Base URL of the CLIENT-PORTAL build (where magic-link emails point). The
+    # client portal is a distinct build served at this path; it must NOT be the
+    # staff root (that build uses Microsoft login + bundled demo data).
+    client_portal_base_url: str = "https://anomaly.gasecosys.co.za/portal"
+
     # R13 go-live gate: real (non-demo) client data is served only when this is
     # true. Flipped on (Unit 12) only after the isolation test passes. Default
     # off = fail-closed.
