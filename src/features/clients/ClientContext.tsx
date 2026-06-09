@@ -30,7 +30,23 @@ interface ClientContextValue {
   reportsDesc: AuditReport[];
   latestReportId: string;
   seedEngagements: Record<string, Engagement>;
+  // False when the roster is empty (fresh deploy, or every client revoked). The
+  // shell still renders so an admin can reach the Clients screen and create the
+  // first client; audit screens show an empty state instead of deadlocking.
+  hasClients: boolean;
 }
+
+// Zero-value sentinel used only when there are no clients at all, so consumers
+// (the switcher, ReportContext) never dereference a null selection. Audit
+// screens are gated behind `hasClients`/`hasReports` and never render it.
+const EMPTY_CLIENT: ClientEntry = {
+  id: "",
+  info: { name: "", healthTarget: 0 },
+  reports: [],
+  reportsDesc: [],
+  latestReportId: "",
+  seedEngagements: {},
+};
 
 const ClientContext = React.createContext<ClientContextValue | null>(null);
 
@@ -111,7 +127,17 @@ export function ClientProvider({ children }: { children: React.ReactNode }) {
       </div>
     );
   }
-  if (!summaries || !entry) {
+  if (!summaries) {
+    // Initial roster load — distinct from "loaded but empty" (handled below).
+    return (
+      <div className="flex h-screen items-center justify-center bg-slate-950 text-slate-400">
+        Loading…
+      </div>
+    );
+  }
+  const hasClients = summaries.length > 0;
+  if (hasClients && !entry) {
+    // Roster known; waiting on the selected client's data.
     return (
       <div className="flex h-screen items-center justify-center bg-slate-950 text-slate-400">
         Loading…
@@ -119,16 +145,20 @@ export function ClientProvider({ children }: { children: React.ReactNode }) {
     );
   }
 
+  // Zero clients → render the shell with a sentinel selection so the admin can
+  // still reach the Clients screen to create one (no deadlock).
+  const selected = entry ?? EMPTY_CLIENT;
   const value: ClientContextValue = {
     clients: summaries,
-    selectedClient: entry,
-    selectedClientId: entry.id,
+    selectedClient: selected,
+    selectedClientId: selected.id,
     selectClient,
-    clientInfo: entry.info,
-    reports: entry.reports,
-    reportsDesc: entry.reportsDesc,
-    latestReportId: entry.latestReportId,
-    seedEngagements: entry.seedEngagements,
+    clientInfo: selected.info,
+    reports: selected.reports,
+    reportsDesc: selected.reportsDesc,
+    latestReportId: selected.latestReportId,
+    seedEngagements: selected.seedEngagements,
+    hasClients,
   };
 
   return <ClientContext.Provider value={value}>{children}</ClientContext.Provider>;

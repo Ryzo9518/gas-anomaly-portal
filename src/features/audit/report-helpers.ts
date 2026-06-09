@@ -52,7 +52,9 @@ export function computeCumulative(
     totalEstimated,
     totalFindingsResolved,
     totalFindingsRegressed,
-    healthGain: latest.healthScore - earliest.healthScore,
+    // No reports yet (a client with no audit data loaded) → no health gain to
+    // show. Guards against indexing an empty reports array.
+    healthGain: latest && earliest ? latest.healthScore - earliest.healthScore : 0,
   };
 }
 
