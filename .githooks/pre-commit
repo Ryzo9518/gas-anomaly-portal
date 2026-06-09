@@ -1,0 +1,30 @@
+#!/usr/bin/env sh
+#
+# GAS Anomaly Portal — pre-commit quality gate.
+#
+# Enforces AGENTS.md §3 (Quality Gates) automatically before every commit.
+# This is LOCAL enforcement only — it is not GitHub Actions / cloud CI, so it
+# is consistent with the standing no-Actions rule in AGENTS.md §4.
+#
+# Wired via `npm run prepare`, which sets `git config core.hooksPath .githooks`.
+#
+# Gate 1: TypeScript strict (tsc --noEmit) — 0 errors, no `any`.
+# Gate 2: Production build succeeds.
+# (Gate 3, the manual visual check in QUALITY_GATES.md, stays the committer's
+#  responsibility — a machine cannot verify it.)
+#
+# Emergency bypass (use sparingly, and never to ship to main):
+#   git commit --no-verify
+
+set -e
+
+echo "[pre-commit] Gate 1/2 — typecheck (tsc --noEmit)…"
+npm run typecheck
+
+echo "[pre-commit] Gate 2/2 — production build…"
+npm run build
+
+echo "[pre-commit] ✓ Gates 1–2 passed."
+echo "[pre-commit]   Reminder: Gate 3 (manual visual check) and verify:isolation"
+echo "[pre-commit]   for multi-client changes are still your responsibility —"
+echo "[pre-commit]   see docs/claude-handoff/QUALITY_GATES.md."
