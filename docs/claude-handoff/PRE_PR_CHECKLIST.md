@@ -40,8 +40,9 @@ see `.githooks/pre-commit` — but you remain responsible for the rest.)
 - [ ] `ReportContext` imports from `fixture.active` only.
 - [ ] No new brand colors — violet primary, amber historical, emerald success, red risk.
 - [ ] Commit messages follow the `[FEATURE]` format in AGENTS.md §4.
-- [ ] **No `.github/workflows/` added** (no GitHub Actions) without a recorded decision
-      to amend AGENTS.md §4.
+- [ ] **CI scope respected.** GitHub Actions are allowed for *validation only* (AGENTS.md
+      §4). Any workflow that deploys, holds secrets, or promotes a build needs a fresh
+      recorded §4 amendment.
 
 ## Phase discipline (AGENTS.md §5)
 
