@@ -52,4 +52,10 @@ export const adminApi = {
     call<{ ok: boolean }>(`/api/admin/clients/${clientId}/revoke`, {
       method: "POST",
     }),
+  // HARD delete — removes the company and ALL its data (audit payload, contacts,
+  // sessions). Irreversible; distinct from revoke. Confirm-gated in the UI.
+  deleteClient: (clientId: string) =>
+    call<{ ok: boolean; deleted: string }>(`/api/admin/clients/${clientId}`, {
+      method: "DELETE",
+    }),
 };

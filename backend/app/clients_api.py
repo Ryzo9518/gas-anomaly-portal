@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 from .config import settings
 from .db import get_db
 from .deps import require_client
-from .models import Client, ClientData
+from .models import Client, ClientData, payload_engagements, payload_reports
 
 router = APIRouter(prefix="/api", tags=["client-data"])
 
@@ -41,4 +41,16 @@ def my_reports(ctx: dict = Depends(require_client), db: Session = Depends(get_db
         return []
     if not data.is_demo and not settings.isolation_verified:
         return []  # real data withheld until the isolation gate is opened
-    return data.payload or []
+    return payload_reports(data.payload)
+
+
+@router.get("/engagements")
+def my_engagements(ctx: dict = Depends(require_client), db: Session = Depends(get_db)):
+    """The signed-in client's engagement plans (keyed by report id). Same scoping
+    and real-data gate as /reports; returns {} when none exist."""
+    data = db.get(ClientData, uuid.UUID(ctx["client_id"]))
+    if not data:
+        return {}
+    if not data.is_demo and not settings.isolation_verified:
+        return {}
+    return payload_engagements(data.payload)
