@@ -3,7 +3,7 @@
 // build-time registry (mock). Phase 2 swaps in a bff adapter that calls
 // GET /api/clients scoped to the authenticated identity (admin → all,
 // client → one) — see docs/specs/2026-06-08-phase-2-auth-design.md.
-import type { ClientEntry, ClientSummary } from "@/features/clients/clients.data";
+import type { ClientEntry, ClientSummary } from "@/features/clients/clients.types";
 
 export interface ClientsPort {
   listClients(): Promise<ClientSummary[]>;

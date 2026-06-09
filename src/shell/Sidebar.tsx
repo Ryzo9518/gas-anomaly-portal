@@ -3,7 +3,7 @@ import { NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard, Upload, FileText, AlertTriangle, Lock,
-  PanelLeftClose, PanelLeftOpen, Handshake,
+  PanelLeftClose, PanelLeftOpen, Handshake, Users,
 } from "lucide-react";
 import { flags, isActive, isLocked, isStub } from "@/flags/flags";
 import logoUrl from "@/assets/brand/logo.png";
@@ -197,6 +197,31 @@ export function NavBtn({ item, collapsed }: { item: NavItem; collapsed: boolean 
   );
 }
 
+// Admin-only nav entry → the Invite & manage clients screen. Hidden for
+// non-admins (the backend enforces access regardless).
+function AdminNavLink({ collapsed }: { collapsed: boolean }) {
+  const isAdmin = useAuthStore((s) => s.actor?.isAdmin);
+  if (!isAdmin) return null;
+  return (
+    <NavLink
+      to="/admin/clients"
+      className={({ isActive }) =>
+        cn(
+          "group relative flex items-center h-9 rounded-lg text-[13.5px] font-medium gap-2.5",
+          "transition-colors duration-200 ease-out-expo motion-reduce:transition-none",
+          collapsed ? "w-9 mx-auto justify-center" : "px-2.5",
+          isActive
+            ? "bg-gradient-to-r from-violet-500/35 via-violet-500/15 to-violet-500/5 text-white"
+            : "text-slate-300 hover:text-white hover:bg-white/5",
+        )
+      }
+    >
+      <Users className="h-[17px] w-[17px] shrink-0" />
+      {!collapsed && <span>Clients</span>}
+    </NavLink>
+  );
+}
+
 export function Sidebar() {
   const collapsed = useUIStore((s) => s.sidebarCollapsed);
   const toggle = useUIStore((s) => s.toggleSidebar);
@@ -337,6 +362,7 @@ export function Sidebar() {
           Workspace
         </div>
         {primary.map((i) => <NavBtn key={i.to} item={i} collapsed={collapsed} />)}
+        <AdminNavLink collapsed={collapsed} />
 
         {/* Settings footer link removed (2026-06-05) — /settings route is gone. */}
       </nav>

@@ -2,7 +2,7 @@ import * as React from "react";
 import { useSearchParams, useLocation } from "react-router-dom";
 import { useClient } from "@/features/clients/ClientContext";
 import { priorReportOf, computeCumulative } from "@/features/audit/report-helpers";
-import type { ClientInfo } from "@/features/clients/clients.data";
+import type { ClientInfo } from "@/features/clients/clients.types";
 import type {
   AuditReport,
   AuditUploadFile,

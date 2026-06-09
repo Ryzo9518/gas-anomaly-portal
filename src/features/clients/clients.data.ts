@@ -12,25 +12,15 @@
 import type { AuditReport, Engagement } from "@/features/audit/reports.fixture";
 import * as tourvestData from "@/features/audit/reports.fixture";
 import * as newClientData from "@/features/audit/reports.fixture.clean";
+// Types live in clients.types.ts (no fixture data) so view code can import them
+// without dragging this fixture-bearing module into a client-portal bundle.
+import type {
+  ClientEntry,
+  ClientInfo,
+  ClientSummary,
+} from "@/features/clients/clients.types";
 
-export interface ClientInfo {
-  name: string;
-  healthTarget: number;
-}
-
-export interface ClientEntry {
-  id: string; // URL slug
-  info: ClientInfo;
-  reports: AuditReport[]; // as authored (oldest → newest)
-  reportsDesc: AuditReport[]; // newest first
-  latestReportId: string;
-  seedEngagements: Record<string, Engagement>;
-}
-
-export interface ClientSummary {
-  id: string;
-  name: string;
-}
+export type { ClientEntry, ClientInfo, ClientSummary };
 
 interface FixtureModule {
   CLIENT_INFO: ClientInfo;

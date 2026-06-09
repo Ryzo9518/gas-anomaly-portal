@@ -15,6 +15,9 @@ def issue_session(resp: Response, *, sub: str, email: str, name: str) -> None:
             "email": email,
             "name": name,
             "role": "staff",
+            # Admin is a distinct, default-deny grant (R1): true only for emails
+            # on the explicit admin allow-list (a subset of staff).
+            "is_admin": email.strip().lower() in settings.admin_allow_list,
             "iat": now,
             "exp": now + settings.session_ttl_hours * 3600,
         },
