@@ -23,9 +23,26 @@ from .models import (
     CONTACT_REVOKED,
     AuditLog,
     Client,
+    ClientData,
     ClientSession,
     Contact,
 )
+
+# Contract field set for an AuditReport payload (docs/FIXTURE_CONTRACT.md §2).
+AUDIT_REPORT_KEYS = {
+    "id",
+    "shortLabel",
+    "cycleLabel",
+    "status",
+    "completedAt",
+    "healthScore",
+    "leakageEstimate",
+    "leakageRecoverable",
+    "risks",
+    "findings",
+    "uploadSubmittedAt",
+    "uploads",
+}
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
 
@@ -38,6 +55,11 @@ class CreateClientBody(BaseModel):
 
 class InviteBody(BaseModel):
     emails: list[str]
+
+
+class LoadDataBody(BaseModel):
+    reports: list[dict]
+    is_demo: bool = False
 
 
 class ContactOut(BaseModel):
@@ -160,6 +182,65 @@ def resend_invite(
         status = "failed"
     db.commit()
     return {"email": contact.email, "status": status}
+
+
+def _validate_reports(reports: list[dict]) -> None:
+    """Enforce the fixture contract on incoming report payloads (Unit 11) so a
+    real-data load can never drift from what the UI expects."""
+    for r in reports:
+        missing = AUDIT_REPORT_KEYS - set(r.keys())
+        if missing:
+            raise HTTPException(
+                422,
+                {"error": f"report missing fields: {sorted(missing)}", "code": "invalid_report"},
+            )
+        if set((r.get("risks") or {}).keys()) != {"critical", "high", "medium", "low"}:
+            raise HTTPException(
+                422,
+                {"error": "risks must have critical/high/medium/low", "code": "invalid_report"},
+            )
+
+
+@router.post("/clients/{client_id}/data")
+def load_client_data(
+    client_id: str,
+    body: LoadDataBody,
+    admin: dict = Depends(current_admin),
+    db: Session = Depends(get_db),
+):
+    """Minimal, audited real-data load (Unit 11). Upserts a client's audit
+    payload (AuditReport[]) into ClientData. The polished authoring UI is a
+    later workstream — this is the audited path that lets a real client be
+    onboarded. Real data (is_demo=False) is still gated by ISOLATION_VERIFIED at
+    serve time."""
+    client = db.get(Client, _uid(client_id))
+    if not client or client.revoked_at is not None:
+        raise HTTPException(404, {"error": "client not found", "code": "not_found"})
+    _validate_reports(body.reports)
+    existing = db.get(ClientData, client.id)
+    if existing:
+        existing.payload = body.reports
+        existing.is_demo = body.is_demo
+        existing.updated_by = admin["email"]
+    else:
+        db.add(
+            ClientData(
+                client_id=client.id,
+                payload=body.reports,
+                is_demo=body.is_demo,
+                updated_by=admin["email"],
+            )
+        )
+    db.add(
+        AuditLog(
+            event="client_data_loaded",
+            actor=admin["email"],
+            target_client_id=client.id,
+            detail=f"{len(body.reports)} report(s), is_demo={body.is_demo}",
+        )
+    )
+    db.commit()
+    return {"ok": True, "reports": len(body.reports)}
 
 
 def _revoke_sessions(db: Session, *, contact_id=None, client_id=None) -> None:
