@@ -26,7 +26,7 @@
 
 ### Conventions & phase (AGENTS.md §4–§5)
 - [ ] Stack / directory / naming / color conventions respected
-- [ ] No new `.github/workflows/` (no Actions) without a recorded §4 amendment
+- [ ] CI scope respected — Actions allowed for validation only; deploy/secret workflows need a §4 amendment
 - [ ] Phase 1 boundaries respected (auth mocked-not-missing; backend behind `src/adapters/`)
 
 <!-- Full detail: docs/claude-handoff/PRE_PR_CHECKLIST.md -->
