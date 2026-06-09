@@ -26,6 +26,11 @@ class Settings(BaseSettings):
     # in the tenant the app registration lives in.
     graph_sender: str = "anomaly@jera.co.za"
 
+    # R13 go-live gate: real (non-demo) client data is served only when this is
+    # true. Flipped on (Unit 12) only after the isolation test passes. Default
+    # off = fail-closed.
+    isolation_verified: bool = False
+
     # Client magic-link / session lifetimes (R7/R11)
     magic_link_ttl_minutes: int = 30
     client_session_ttl_hours: int = 8

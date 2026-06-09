@@ -6,6 +6,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from .auth_microsoft import router as ms_router
 from .client_auth_api import router as client_auth_router
 from .clients_admin_api import router as admin_router
+from .clients_api import router as client_data_router
 from .config import settings
 from .deps import current_staff
 from .security import clear_session
@@ -26,6 +27,7 @@ app.add_middleware(
 app.include_router(ms_router)
 app.include_router(admin_router)
 app.include_router(client_auth_router)
+app.include_router(client_data_router)
 
 
 @app.get("/api/health")

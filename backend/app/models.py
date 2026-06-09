@@ -10,6 +10,8 @@ import datetime as dt
 import uuid
 
 from sqlalchemy import (
+    JSON,
+    Boolean,
     DateTime,
     ForeignKey,
     Integer,
@@ -153,6 +155,24 @@ class AuditLog(Base):
     created_at: Mapped[dt.datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
+
+
+class ClientData(Base):
+    """The per-client audit payload served by the backend (R13). One row per
+    client; `payload` is the same shape the SPA's report fixtures used. `is_demo`
+    flags non-real data — real data is withheld until ISOLATION_VERIFIED is on.
+    """
+    __tablename__ = "client_data"
+
+    client_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("clients.id", ondelete="CASCADE"), primary_key=True
+    )
+    payload: Mapped[dict] = mapped_column(JSON, default=dict)
+    is_demo: Mapped[bool] = mapped_column(Boolean, default=True)
+    updated_at: Mapped[dt.datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    updated_by: Mapped[str | None] = mapped_column(String(320), nullable=True)
 
 
 class RateLimit(Base):
