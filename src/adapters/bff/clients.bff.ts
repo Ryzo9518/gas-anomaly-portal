@@ -1,4 +1,4 @@
-import type { AuditReport } from "@/features/audit/reports.fixture";
+import type { AuditReport, Engagement } from "@/features/audit/reports.fixture";
 import type {
   ClientEntry,
   ClientSummary,
@@ -23,8 +23,13 @@ async function getJSON<T>(url: string): Promise<T> {
 }
 
 /** Assemble a ClientEntry from the BFF responses, identically to the registry
- *  (FIXTURE_CONTRACT §1). Exported for the drift test. */
-export function assembleEntry(c: ClientDto, reports: AuditReport[]): ClientEntry {
+ *  (FIXTURE_CONTRACT §1). Exported for the drift test. `engagements` carries the
+ *  recovered-to-date / engagement-outcome story; {} when none are loaded. */
+export function assembleEntry(
+  c: ClientDto,
+  reports: AuditReport[],
+  engagements: Record<string, Engagement> = {},
+): ClientEntry {
   const reportsDesc = [...reports].sort((a, b) =>
     b.completedAt.localeCompare(a.completedAt),
   );
@@ -34,7 +39,7 @@ export function assembleEntry(c: ClientDto, reports: AuditReport[]): ClientEntry
     reports,
     reportsDesc,
     latestReportId: reportsDesc[0]?.id ?? "",
-    seedEngagements: {},
+    seedEngagements: engagements,
   };
 }
 
@@ -49,6 +54,8 @@ export const clientsBff: ClientsPort = {
     const c = await getJSON<ClientDto | null>("/api/clients");
     if (!c) return null;
     const reports = await getJSON<AuditReport[]>("/api/reports");
-    return assembleEntry(c, reports);
+    const engagements =
+      await getJSON<Record<string, Engagement>>("/api/engagements");
+    return assembleEntry(c, reports, engagements);
   },
 };

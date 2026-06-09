@@ -30,12 +30,14 @@ describe("clientsStaffBff (staff data adapter)", () => {
     ]);
   });
 
-  it("getClient assembles a ClientEntry (info + reports, newest-first)", async () => {
+  it("getClient assembles a ClientEntry (info + reports + engagements, newest-first)", async () => {
+    const engagements = { "2026": { reportId: "2026", status: "complete" } };
     vi.stubGlobal(
       "fetch",
       mockFetch({
         "/api/admin/clients": ADMIN_CLIENTS,
         "/api/admin/clients/u1/reports": REPORTS,
+        "/api/admin/clients/u1/engagements": engagements,
       }),
     );
     const entry = await clientsStaffBff.getClient("u1");
@@ -43,6 +45,7 @@ describe("clientsStaffBff (staff data adapter)", () => {
     expect(entry!.info).toEqual({ name: "Alpha", healthTarget: 80 });
     expect(entry!.reportsDesc.map((r) => r.id)).toEqual(["2026", "2025"]);
     expect(entry!.latestReportId).toBe("2026");
+    expect(entry!.seedEngagements).toEqual(engagements);
   });
 
   it("getClient yields an empty-workspace entry when no data is loaded", async () => {
@@ -51,11 +54,13 @@ describe("clientsStaffBff (staff data adapter)", () => {
       mockFetch({
         "/api/admin/clients": ADMIN_CLIENTS,
         "/api/admin/clients/u1/reports": [],
+        "/api/admin/clients/u1/engagements": {},
       }),
     );
     const entry = await clientsStaffBff.getClient("u1");
     expect(entry!.reports).toEqual([]);
     expect(entry!.latestReportId).toBe("");
+    expect(entry!.seedEngagements).toEqual({});
   });
 
   it("getClient returns null for a revoked or unknown client", async () => {
