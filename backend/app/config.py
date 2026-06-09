@@ -22,6 +22,10 @@ class Settings(BaseSettings):
     # Database (SQLAlchemy URL, e.g. postgresql+psycopg://user:pass@host/gas_portal)
     database_url: str
 
+    # Microsoft Graph sender for invite/re-link emails (R12). Must be a mailbox
+    # in the tenant the app registration lives in.
+    graph_sender: str = "anomaly@jera.co.za"
+
     # Client magic-link / session lifetimes (R7/R11)
     magic_link_ttl_minutes: int = 30
     client_session_ttl_hours: int = 8

@@ -40,6 +40,21 @@ def engine():
 
 
 @pytest.fixture()
+def api_session(engine):
+    """A committing session for API tests (the routes call db.commit()). Rows are
+    deleted after the test to isolate. Use for TestClient get_db overrides."""
+    Session = sessionmaker(bind=engine, expire_on_commit=False)
+    session = Session()
+    try:
+        yield session
+    finally:
+        session.close()
+        with engine.begin() as conn:
+            for table in reversed(Base.metadata.sorted_tables):
+                conn.execute(table.delete())
+
+
+@pytest.fixture()
 def db(engine):
     """Per-test session wrapped in a rolled-back transaction for isolation."""
     conn = engine.connect()

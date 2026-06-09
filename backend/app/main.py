@@ -4,6 +4,7 @@ from fastapi import Depends, FastAPI, Request, Response
 from starlette.middleware.sessions import SessionMiddleware
 
 from .auth_microsoft import router as ms_router
+from .clients_admin_api import router as admin_router
 from .config import settings
 from .deps import current_staff
 from .security import clear_session
@@ -22,6 +23,7 @@ app.add_middleware(
 )
 
 app.include_router(ms_router)
+app.include_router(admin_router)
 
 
 @app.get("/api/health")
