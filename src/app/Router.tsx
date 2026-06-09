@@ -13,6 +13,7 @@ import { ReportRoute } from "@/routes/report.route";
 import { FindingsRoute } from "@/routes/findings.route";
 import { FindingDetailRoute } from "@/routes/findingDetail.route";
 import { EngagementRoute } from "@/routes/engagement.route";
+import { AdminClientsRoute } from "@/routes/admin.clients.route";
 
 // V1 audit portal routes — full clickable set landed.
 // Routable:  /login · /dashboard · /upload · /report · /findings · /findings/:rank · /engagement
@@ -65,6 +66,11 @@ export function Router() {
           <Route path="/findings" element={<FindingsRoute />} />
           <Route path="/findings/:rank" element={<FindingDetailRoute />} />
           <Route path="/engagement" element={<EngagementRoute />} />
+        </Route>
+      </Route>
+      <Route element={<RequireAdmin />}>
+        <Route element={<AppLayout />}>
+          <Route path="/admin/clients" element={<AdminClientsRoute />} />
         </Route>
       </Route>
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
