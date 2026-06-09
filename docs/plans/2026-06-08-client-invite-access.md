@@ -1,13 +1,27 @@
 ---
 title: "feat: Client Invite & Access (Model B — backend-issued)"
 type: feat
-status: active
+status: implemented
 date: 2026-06-08
 origin: docs/specs/2026-06-08-client-invite-access-requirements.md
 deepened: 2026-06-08
 ---
 
 # feat: Client Invite & Access (Model B — backend-issued)
+
+> **⚠ Implementation status (2026-06-09): IMPLEMENTED.** All 12 units below have
+> shipped (commits `4d87b35` Unit 1 → `5209f75` Units 11 & 12). The forward-looking
+> framing in **Context & Research** ("No DB layer, no email code, no tests exist yet
+> — these are stood up here") describes the *starting* state and is no longer true:
+> the Postgres layer, Graph email, magic-link auth, admin UI, client login, real-data
+> loader, and isolation test all exist in the codebase. Read this plan as a record of
+> work done, not work pending.
+>
+> **Known gap this plan did NOT close:** the plan never specified how the **staff**
+> audit switcher (build-time registry) and the **admin-created** client list (Postgres)
+> converge. They don't — see
+> [`docs/specs/2026-06-09-staff-client-list-reconciliation.md`](../specs/2026-06-09-staff-client-list-reconciliation.md)
+> for the resulting staff-UX defect and the proposed fix.
 
 ## Overview
 
@@ -88,7 +102,7 @@ ADMIN (staff cookie + admin grant)          CLIENT (no account, client cookie)
 
 ## Implementation Units
 
-- [ ] **Unit 1: Build-vs-buy decision record**
+- [x] **Unit 1: Build-vs-buy decision record**
 **Goal:** Record the client-auth choice with honest blast-radius/ownership analysis (not a blocking phase — commit alongside Unit 2).
 **Requirements:** shapes R3/R6/R7/R11/R15.
 **Files:** Create `docs/specs/2026-06-08-client-auth-build-vs-buy.md`.
@@ -96,7 +110,7 @@ ADMIN (staff cookie + admin grant)          CLIENT (no account, client cookie)
 **Test expectation:** none — decision record.
 **Verification:** Committed record; downstream units confirmed against it.
 
-- [ ] **Unit 2: Postgres + persistence layer + test toolchain**
+- [x] **Unit 2: Postgres + persistence layer + test toolchain**
 **Goal:** Stand up the DB, schema, and the (currently absent) test harness.
 **Requirements:** R10,R11,R14,R15,R16 foundation.
 **Dependencies:** Unit 1.
@@ -105,7 +119,7 @@ ADMIN (staff cookie + admin grant)          CLIENT (no account, client cookie)
 **Test scenarios:** Happy: models CRUD; unique (email,client) enforced. Edge: same email/two clients = 2 rows; dup (email,client) rejected. Error: missing `DATABASE_URL` fails fast.
 **Verification:** Migrations apply on a fresh DB; `pytest` + `vitest` run; frontend `typecheck`/`build` unaffected.
 
-- [ ] **Unit 3: Admin authz + roles surfaced to SPA + session-type separation**
+- [x] **Unit 3: Admin authz + roles surfaced to SPA + session-type separation**
 **Goal:** Distinct, server-enforced admin grant; role available to the SPA; staff/client session separation primitives.
 **Requirements:** R1,R10.
 **Dependencies:** Unit 2.
@@ -114,7 +128,7 @@ ADMIN (staff cookie + admin grant)          CLIENT (no account, client cookie)
 **Test scenarios:** admin→allowed; staff-not-admin→403; unauthenticated→401; **client cookie → admin route → 403** (added after Unit 5). Integration: 403 enforced server-side even if UI bypassed.
 **Verification:** Admin routes reject non-admins and client sessions server-side; SPA can gate admin nav by role.
 
-- [ ] **Unit 4: Invite issuance + Graph email + early deliverability smoke**
+- [x] **Unit 4: Invite issuance + Graph email + early deliverability smoke**
 **Goal:** Admin creates client/contacts and sends magic-link invites; prove external deliverability early.
 **Requirements:** R2,R3,R12,R15,R17,R10.
 **Dependencies:** Units 2,3.
@@ -123,7 +137,7 @@ ADMIN (staff cookie + admin grant)          CLIENT (no account, client cookie)
 **Test scenarios:** Happy: invite→contact(invited)+send+audit; token stored hashed (raw never persisted/logged). Edge: same email/2nd client → new (email,client). Error: Graph failure → delivery `failed`, admin-visible. Security: entropy ≥128-bit.
 **Verification:** Admin invites; email arrives **in inbox (external mailbox)**; DB holds hash+audit.
 
-- [ ] **Unit 5: Magic-link verify + server-validated client session**
+- [x] **Unit 5: Magic-link verify + server-validated client session**
 **Goal:** Redeem a link → revocable, per-client, server-validated session.
 **Requirements:** R6,R7,R11,R14,R15.
 **Dependencies:** Units 2,4.
@@ -132,7 +146,7 @@ ADMIN (staff cookie + admin grant)          CLIENT (no account, client cookie)
 **Test scenarios:** Happy: valid token → correct-client session. Error: used/expired/forged/missing → one identical "no longer valid" (R7); **concurrent double-redeem → exactly one succeeds** (atomicity). Edge: 2 active contacts → chooser. Security: session id server-generated; staff cookie rejected by `current_client`; revocation effective next request.
 **Verification:** Client logs in via link; one-client session; reused/expired link rejected; concurrent redeem safe.
 
-- [ ] **Unit 6: Per-identity data serving, default-deny, fixtures out of the bundle (R13)**
+- [x] **Unit 6: Per-identity data serving, default-deny, fixtures out of the bundle (R13)**
 **Goal:** Serve client data scoped to the session, default-deny; remove real client data from the SPA bundle.
 **Requirements:** R9,R13.
 **Dependencies:** Unit 5 (`current_client`).
@@ -142,7 +156,7 @@ ADMIN (staff cookie + admin grant)          CLIENT (no account, client cookie)
 **Test scenarios:** Happy: client A → only A's data. Security: **no session → zero data**; forged/expired session → zero data; A requests B's id → denied; flag off → no real data. Build: production `dist/` contains no client fixture data. Integration: `ClientContext` renders from the API.
 **Verification:** Cross-client + no-session both return nothing; `dist/` grep clean; demo path defined and works.
 
-- [ ] **Unit 7: Self-service re-link (rate-limited, no enumeration)**
+- [x] **Unit 7: Self-service re-link (rate-limited, no enumeration)**
 **Goal:** Active contacts request a fresh link themselves.
 **Requirements:** R8,R16,R17. **Dependencies:** Units 4,5.
 **Files:** Modify `backend/app/client_auth_api.py` (`POST /api/auth/client/relink`), `backend/app/email_graph.py` (re-link template); Create `backend/app/ratelimit.py` (Postgres-backed; inline if only one caller). Test `backend/tests/test_relink.py`.
@@ -150,7 +164,7 @@ ADMIN (staff cookie + admin grant)          CLIENT (no account, client cookie)
 **Test scenarios:** Happy: active → link, neutral response. Error: unknown/revoked → identical neutral, no link. Security: limit triggers; timing constant (no enum).
 **Verification:** Active get links; others nothing; identical responses; limits enforced.
 
-- [ ] **Unit 8: Revocation + admin contact/status APIs**
+- [x] **Unit 8: Revocation + admin contact/status APIs**
 **Goal:** View status/last-login/delivery; revoke contact or whole client (effective next request).
 **Requirements:** R4,R5,R10,R11. **Dependencies:** Units 2,3,5.
 **Files:** Modify `backend/app/clients_admin_api.py`. Test `backend/tests/test_revoke.py`.
@@ -158,7 +172,7 @@ ADMIN (staff cookie + admin grant)          CLIENT (no account, client cookie)
 **Test scenarios:** Happy: list shows status/last-login/delivery; revoke contact. Integration: **whole-client revoke kills a live session on next request (within seconds)**; revoked contact blocked next request. Edge: revoked rows still visible.
 **Verification:** Revoke blocks on next request; audit records who/when.
 
-- [ ] **Unit 9: Admin "Invite & manage clients" UI**
+- [x] **Unit 9: Admin "Invite & manage clients" UI**
 **Goal:** The in-app admin screen.
 **Requirements:** R1,R2,R4,R5. **Dependencies:** Units 3,4,8.
 **Files:** Create `src/routes/admin.clients.route.tsx`, `src/features/admin/*`; Modify `src/app/Router.tsx` (`RequireAdmin` route), `src/shell/Sidebar.tsx` (admin-only nav). Test `src/features/admin/*.test.tsx`.
@@ -173,7 +187,7 @@ ADMIN (staff cookie + admin grant)          CLIENT (no account, client cookie)
 **Test scenarios:** Happy: invite flow submits, shows success, contact appears. States: empty / in-progress / send-failure / never-logged-in="Pending". Edge: non-admin cannot see/reach. Integration: whole-client revoke modal confirms.
 **Verification:** Admin runs the full loop in-app; non-admins cannot.
 
-- [ ] **Unit 10: Client login & re-link UI**
+- [x] **Unit 10: Client login & re-link UI**
 **Goal:** Client-facing magic-link flows.
 **Requirements:** R6,R7,R8,R14. **Dependencies:** Units 5,7.
 **Files:** Modify `src/routes/authCallback.route.tsx` (client verify), `src/features/login/LoginCard.tsx` (client door: email→link, "check your inbox"), `src/adapters/bff/auth.bff.ts` (client endpoints), `src/app/Router.tsx` (`RequireClient`, chooser + invalid-link routes). Test relevant `*.test.tsx`.
@@ -185,7 +199,7 @@ ADMIN (staff cookie + admin grant)          CLIENT (no account, client cookie)
 **Test scenarios:** Happy: valid link → scoped dashboard (only their data). States: used/expired/invalid → generic → self-service. Edge: multi-client → chooser. Integration: client session drives `RequireClient` + `ClientContext`.
 **Verification:** End-to-end emailed-link → scoped dashboard.
 
-- [ ] **Unit 11: Minimal real-data load path**
+- [x] **Unit 11: Minimal real-data load path**
 **Goal:** An audited, server-side way to load **one real client's** actual audit data (not the rich UI) so a real client can be onboarded.
 **Requirements:** R9,R13 (real data); enables the headline outcome.
 **Dependencies:** Units 2,6.
@@ -194,7 +208,7 @@ ADMIN (staff cookie + admin grant)          CLIENT (no account, client cookie)
 **Test scenarios:** Happy: load client X data → X's client session sees it. Security: load is admin-only + audited; loaded data never enters the SPA bundle. Edge: malformed import rejected with a clear error.
 **Verification:** A real client's data can be loaded and is visible only to that client.
 
-- [ ] **Unit 12: Isolation test, flag flip, onboard one real client, retire one passcode site**
+- [x] **Unit 12: Isolation test, flag flip, onboard one real client, retire one passcode site**
 **Goal:** Prove isolation, enable real data, onboard a real client end-to-end, retire that client's passcode site.
 **Requirements:** R9,R13, success criteria. **Dependencies:** Units 5,6,8,11.
 **Files:** Create `backend/tests/test_isolation.py` (runtime analogue); Modify deploy/runbook (`ISOLATION_VERIFIED` env flag + procedure; passcode-site retirement).

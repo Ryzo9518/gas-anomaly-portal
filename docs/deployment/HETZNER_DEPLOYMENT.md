@@ -9,6 +9,16 @@ single-page app served by nginx over HTTPS.
 > in once the target Hetzner box and DNS for `anomaly.gasecosys.co.za` are
 > confirmed. Do not improvise them on a production box.
 
+> **⚠ Incomplete (2026-06-09): this runbook predates the backend.** It still says
+> "Phase 1 makes **no backend calls** — there is nothing to proxy yet" (§0) and the
+> §7 proxy example points at `127.0.0.1:8000`. That is no longer true: a FastAPI
+> backend (`backend/`) is live, listens on **:8001** (not 8000), requires **Postgres**
+> + Entra/Graph secrets, and runs as `deploy/gas-portal-api.service`. The staff admin
+> screen and the client portal **do not work without it**. The static-SPA steps below
+> are still correct for the frontend; a backend-deploy section (service, DB, migrations,
+> `/api/` proxy → :8001, `/etc/gas-portal/api.env`) needs to be added by JP before this
+> is a complete prod-deploy guide. Do not treat the "no backend" framing as current.
+
 ---
 
 ## 0. Why static + SPA fallback
