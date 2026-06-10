@@ -32,7 +32,10 @@ export function AppLayout() {
   // report and would render empty/crash when the client has no data. The admin
   // Clients screen is exempt — it manages its own list and must stay reachable
   // so the first client (and its data) can be created.
-  const showNoAuditData = !hasReports && !pathname.startsWith("/admin");
+  // /upload is exempt: clients upload data BEFORE any audit exists, so it must
+  // render even with no reports (otherwise the no-data state would hide it).
+  const showNoAuditData =
+    !hasReports && !pathname.startsWith("/admin") && !pathname.startsWith("/upload");
 
   return (
     // `isolate` (CSS isolation: isolate) creates a fresh stacking
