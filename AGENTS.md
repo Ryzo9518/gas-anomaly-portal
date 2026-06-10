@@ -82,7 +82,7 @@ remains the committer's responsibility — see the one-screen
 
 ## 4. Conventions (binding)
 
-- **Stack is fixed:** React 18 + Vite 5 + TypeScript 5 (strict) + Tailwind 3 +
+- **Stack is fixed:** React 18 + Vite 5 + TypeScript 5 (noImplicitAny disabled — see tsconfig.app.json) + Tailwind 3 +
   React Router 6 + TanStack Query 5 + Zustand + Radix UI. Do not introduce a new
   state library, router, or styling system.
 - **No new top-level directories** under `src/`. Use the existing structure.

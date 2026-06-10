@@ -58,7 +58,7 @@ const status = engFinding?.status || null; // ✓ Single source
 
 **Enforcement:** dashboard.route.tsx:
 ```typescript
-const cumulative = computeCumulative(); // No caching
+const cumulative = computeCumulative(reportsDesc, engagementsById); // No caching
 ```
 
 ---
@@ -151,12 +151,16 @@ src/
 ├── ports/auth.port.ts                [AuthPort INTERFACE]
 ├── state/                            [authStore, uiStore, query]
 ├── routes/
-│   ├── login.route.tsx               [/login — mock auth]
-│   ├── dashboard.route.tsx           [KPI CARDS]
-│   ├── findings.route.tsx            [TABLE + PLAN COLUMN]
-│   ├── engagement.route.tsx          [BUILDER + LOCKED VIEW]
-│   ├── findingDetail.route.tsx       [DETAIL PAGE]
-│   └── upload.route.tsx              [ARCHIVE VIEW + NEW-CYCLE INTAKE]
+│   ├── login.route.tsx               [/login — staff auth flow]
+│   ├── authCallback.route.tsx        [/auth/callback — OAuth redirect handler]
+│   ├── clientVerify.route.tsx        [/auth/verify — client magic-link redemption]
+│   ├── dashboard.route.tsx           [/dashboard — KPI CARDS]
+│   ├── findings.route.tsx            [/findings — TABLE + PLAN COLUMN]
+│   ├── engagement.route.tsx          [/engagement — BUILDER + LOCKED VIEW]
+│   ├── findingDetail.route.tsx       [/findings/:rank — DETAIL PAGE]
+│   ├── upload.route.tsx              [/upload — ARCHIVE VIEW + NEW-CYCLE INTAKE]
+│   ├── report.route.tsx              [/report — embedded report viewer]
+│   └── admin.clients.route.tsx       [/admin/clients — Jera admin client management]
 └── shell/
     ├── TopBar.tsx                    [REPORT SELECTOR + BANNER]
     └── Sidebar, AppLayout, MobileNav, CommandBar, ... (see FILE_STRUCTURE)
@@ -166,14 +170,13 @@ src/
 
 ---
 
-## TypeScript Rules (Strict Mode)
+## TypeScript Rules
 
 - **No `any` types** — always type explicitly
-- **No implicit `any`** — parameters must have types
 - **No loose unions** — use enums or literal unions
 - **No undefined without guard** — check before using
 
-**Check:** `npm run typecheck` must be 0 errors.
+> Note: `tsconfig.app.json` runs with `"strict": false` / `"noImplicitAny": false` as a pragmatic baseline. This does not license sloppy types — write explicit types regardless. `npm run typecheck` must still be 0 errors.
 
 ---
 
@@ -228,7 +231,7 @@ npm run build       # Gate 2
 PORT=5199 npm run dev  # Gate 3 (manual visual test)
 ```
 
-**All must pass before commit. GitHub Actions not used (standing rule).**
+**All must pass before commit. GitHub Actions are used for validation only (amended 2026-06-09 — AGENTS.md §4). No CI workflow may deploy.**
 
 ---
 
