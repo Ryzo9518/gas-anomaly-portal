@@ -2,10 +2,12 @@
 #
 # Deploy the GAS Anomaly Portal to the Hetzner box (anomaly.gasecosys.co.za).
 #
-# Builds and deploys all THREE artifacts from a CLEAN, up-to-date `main`:
+# Builds and deploys all FOUR artifacts from a CLEAN, up-to-date `main`:
 #   1. backend  -> /opt/gas-portal/backend            (gas-portal-api.service :8001)
 #   2. staff    -> /opt/gas-anomaly-portal/dist        (gas-anomaly.service node :8090)
 #   3. portal   -> /opt/gas-portal/portal              (Caddy static, /portal)
+#   4. demo     -> /opt/gas-portal/demo                (Caddy static, /demo — public,
+#                                                       offline mock build, noindex)
 #
 # Why this script exists: deploys used to be hand-typed, which caused (a) the
 # staff `server.js` going missing -> outage, and (b) the client portal being
@@ -13,7 +15,7 @@
 # restores server.js, logs the SHA, and VERIFIES the live bundle == what it built.
 #
 # Usage:
-#   scripts/deploy-hetzner.sh [all|backend|staff|portal]   # default: all
+#   scripts/deploy-hetzner.sh [all|backend|staff|portal|demo]   # default: all
 #
 # Requires: SSH to $DEPLOY_HOST, node/npm, rsync. Run from a clean `main`.
 set -euo pipefail
@@ -21,6 +23,7 @@ set -euo pipefail
 DEPLOY_HOST="${DEPLOY_HOST:-root@159.69.216.113}"
 STAFF_DIR="${STAFF_DIR:-/opt/gas-anomaly-portal/dist}"
 PORTAL_DIR="${PORTAL_DIR:-/opt/gas-portal/portal}"
+DEMO_DIR="${DEMO_DIR:-/opt/gas-portal/demo}"
 BACKEND_DIR="${BACKEND_DIR:-/opt/gas-portal/backend}"
 DEPLOY_LOG="${DEPLOY_LOG:-/opt/gas-anomaly-portal/DEPLOY_LOG.txt}"
 SITE="${SITE:-https://anomaly.gasecosys.co.za}"
@@ -87,18 +90,31 @@ deploy_portal() {
   rm -rf dist
 }
 
+deploy_demo() {
+  say "demo (no env — offline mock build, public /demo)"
+  rm -rf dist && npm run build >/dev/null   # no env = offline demo (mock auth, no backend)
+  local want; want=$(built_hash)
+  backup "$DEMO_DIR"
+  rsync -az --delete dist/ "$DEPLOY_HOST:$DEMO_DIR/"   # Caddy static — no server.js, no service restart
+  local got; got=$(live_hash "$SITE/demo/")
+  [ "$got" = "$want" ] || die "demo verify: live=$got built=$want (mismatch)"
+  echo "   demo ok ($want live)"
+  rm -rf dist
+}
+
 case "$TARGET" in
-  all)     deploy_backend; deploy_staff; deploy_portal ;;
+  all)     deploy_backend; deploy_staff; deploy_portal; deploy_demo ;;
   backend) deploy_backend ;;
   staff)   deploy_staff ;;
   portal)  deploy_portal ;;
-  *) die "unknown target '$TARGET' (use: all|backend|staff|portal)" ;;
+  demo)    deploy_demo ;;
+  *) die "unknown target '$TARGET' (use: all|backend|staff|portal|demo)" ;;
 esac
 
 # --- log + smoke -----------------------------------------------------------
 ssh "$DEPLOY_HOST" "echo '$TS | sha=$SHA | mode=$TARGET (scripts/deploy-hetzner.sh) | by='\$(whoami) >> '$DEPLOY_LOG'"
 say "smoke test"
-for url in "/" "/portal/" "/api/health"; do
+for url in "/" "/portal/" "/demo/" "/api/health"; do
   code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 12 "$SITE$url")
   printf '   %-14s %s\n' "$url" "$code"
   [ "$code" = "200" ] || echo "   ⚠ $url returned $code"
