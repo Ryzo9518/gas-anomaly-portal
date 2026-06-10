@@ -40,7 +40,7 @@ export function RequireAdmin() {
     return <Navigate to="/login" replace />;
   }
   if (!actor.isAdmin) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to={HOME} replace />;
   }
   return <Outlet />;
 }
@@ -73,6 +73,11 @@ function AuthedShell() {
 // surface tree-shakes out.
 const IS_CLIENT_PORTAL = import.meta.env.VITE_AUTH === "client";
 
+// The client portal is restricted to the Upload screen only — clients submit
+// their data; the audit views (dashboard/report/findings/engagement) are staff/
+// internal. Staff keep the full set. HOME is where index + catch-all land.
+const HOME = IS_CLIENT_PORTAL ? "/upload" : "/dashboard";
+
 export function Router() {
   return (
     <Routes>
@@ -85,13 +90,18 @@ export function Router() {
       <Route element={<RequireAuth />}>
         <Route element={<AuthedShell />}>
           <Route element={<AppLayout />}>
-            <Route index element={<Navigate to="/dashboard" replace />} />
-            <Route path="/dashboard" element={<DashboardRoute />} />
+            <Route index element={<Navigate to={HOME} replace />} />
             <Route path="/upload" element={<UploadRoute />} />
-            <Route path="/report" element={<ReportRoute />} />
-            <Route path="/findings" element={<FindingsRoute />} />
-            <Route path="/findings/:rank" element={<FindingDetailRoute />} />
-            <Route path="/engagement" element={<EngagementRoute />} />
+            {/* Audit views — staff only. The client portal is Upload-only. */}
+            {!IS_CLIENT_PORTAL && (
+              <>
+                <Route path="/dashboard" element={<DashboardRoute />} />
+                <Route path="/report" element={<ReportRoute />} />
+                <Route path="/findings" element={<FindingsRoute />} />
+                <Route path="/findings/:rank" element={<FindingDetailRoute />} />
+                <Route path="/engagement" element={<EngagementRoute />} />
+              </>
+            )}
           </Route>
         </Route>
       </Route>
@@ -102,7 +112,7 @@ export function Router() {
           </Route>
         </Route>
       </Route>
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      <Route path="*" element={<Navigate to={HOME} replace />} />
     </Routes>
   );
 }

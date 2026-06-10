@@ -29,7 +29,8 @@ export function ClientVerifyRoute() {
         return;
       }
       await hydrate();
-      navigate("/dashboard", { replace: true });
+      // Client portal is Upload-only — land the client on the upload screen.
+      navigate("/upload", { replace: true });
     })();
     return () => {
       live = false;

@@ -23,16 +23,22 @@ interface NavItem {
   badge?: string;
 }
 
-// V1 audit portal nav. Upload added P0; Report + Findings land in the
-// next turn — featureKey "stub" until their routes ship so the icons
-// render greyed-out instead of broken.
-export const primary: NavItem[] = [
-  { to: "/dashboard",  label: "Dashboard",  icon: LayoutDashboard, featureKey: "dashboard"  },
-  { to: "/upload",     label: "Upload",     icon: Upload,           featureKey: "upload"     },
-  { to: "/report",     label: "Report",     icon: FileText,         featureKey: "report"     },
-  { to: "/findings",   label: "Findings",   icon: AlertTriangle,    featureKey: "findings"   },
-  { to: "/engagement", label: "Engagement", icon: Handshake,        featureKey: "engagement" },
-];
+// Client-portal build (magic-link login) is restricted to Upload only — clients
+// submit their data; the audit views (dashboard/report/findings/engagement) are
+// internal/staff. Build-time literal so the staff nav tree-shakes out of the
+// client bundle.
+const IS_CLIENT_PORTAL = import.meta.env.VITE_AUTH === "client";
+
+// V1 audit portal nav.
+export const primary: NavItem[] = IS_CLIENT_PORTAL
+  ? [{ to: "/upload", label: "Upload", icon: Upload, featureKey: "upload" }]
+  : [
+      { to: "/dashboard",  label: "Dashboard",  icon: LayoutDashboard, featureKey: "dashboard"  },
+      { to: "/upload",     label: "Upload",     icon: Upload,           featureKey: "upload"     },
+      { to: "/report",     label: "Report",     icon: FileText,         featureKey: "report"     },
+      { to: "/findings",   label: "Findings",   icon: AlertTriangle,    featureKey: "findings"   },
+      { to: "/engagement", label: "Engagement", icon: Handshake,        featureKey: "engagement" },
+    ];
 
 // Locked placeholder entries (Rebate / SLA / Vouchers / Client View / Analytics)
 // were removed per extract owner's request. The `locked` array remains exported
