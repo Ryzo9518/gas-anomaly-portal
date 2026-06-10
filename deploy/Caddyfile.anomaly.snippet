@@ -1,14 +1,65 @@
-# Add this INSIDE the existing `anomaly.gasecosys.co.za { ... }` Caddy block,
-# BEFORE the static file_server. Everything not under /api stays a static SPA.
+# Canonical Caddy config for anomaly.gasecosys.co.za — keep this file in sync
+# with the live box at /etc/caddy/conf.d/anomaly.caddy (imported by
+# /etc/caddy/Caddyfile). This is the FULL site block, not a fragment.
 #
-# The FastAPI staff-SSO backend listens on 127.0.0.1:8001 (8000 is taken by the
-# intacct-toolkit service on this box).
+# Box: root@159.69.216.113 (shared with intacct-toolkit — :8000 is theirs, never
+# touch it). After editing on the box: `caddy validate --config /etc/caddy/Caddyfile
+# --adapter caddyfile` then `systemctl reload caddy`. Always back up first.
+#
+# Routes:
+#   /api/*    -> FastAPI backend (127.0.0.1:8001)
+#   /portal/* -> client portal   (Caddy static, /opt/gas-portal/portal)
+#   /demo/*   -> public offline demo (Caddy static, /opt/gas-portal/demo; noindex)
+#   /c/...    -> legacy Tourvest passcode site (being retired)
+#   /*        -> staff SPA        (node :8090, Microsoft SSO)
 
-handle /api/* {
-    reverse_proxy 127.0.0.1:8001
+anomaly.gasecosys.co.za {
+    encode zstd gzip
+
+    # API -> FastAPI backend (staff SSO + client magic-link + admin + data).
+    @api path /api/*
+    handle @api {
+        reverse_proxy 127.0.0.1:8001
+    }
+
+    # Client portal (magic-link login, per-client API data). One build serves
+    # every client; the backend scopes data by session.
+    redir /portal /portal/
+    handle_path /portal/* {
+        root * /opt/gas-portal/portal
+        try_files {path} /index.html
+        file_server
+    }
+
+    # Public offline demo (mock auth, no backend) — link-shareable but kept OUT
+    # of search engines via X-Robots-Tag. Static, same pattern as /portal.
+    # Deployed by `scripts/deploy-hetzner.sh demo`.
+    redir /demo /demo/
+    handle_path /demo/* {
+        root * /opt/gas-portal/demo
+        header X-Robots-Tag "noindex, nofollow"
+        try_files {path} /index.html
+        file_server
+    }
+
+    # Interim Tourvest passcode site (legacy; retire once the new portal is in use).
+    redir /c/tv-fdb5be1b /c/tv-fdb5be1b/
+    handle_path /c/tv-fdb5be1b/* {
+        root * /opt/gas-portal/clients/tourvest
+        try_files {path} /index.html
+        file_server
+    }
+
+    # Staff / internal SPA (Microsoft SSO). Catch-all.
+    handle {
+        reverse_proxy 127.0.0.1:8090
+    }
+
+    log {
+        output file /var/log/caddy/anomaly.log {
+            roll_size 10mb
+            roll_keep 14
+        }
+        format json
+    }
 }
-
-# NOTE on the interim password gate:
-# While rolling out, keep the existing `basicauth` block. Once Microsoft SSO is
-# verified working for all four staff (plan Task 9), REMOVE the basicauth block
-# so the app's own Microsoft login is the only door, then reload Caddy.
