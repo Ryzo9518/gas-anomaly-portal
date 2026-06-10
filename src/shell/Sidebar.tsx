@@ -8,7 +8,6 @@ import {
 import { flags, isActive, isLocked, isStub } from "@/flags/flags";
 import logoUrl from "@/assets/brand/logo.png";
 import { SidebarBg } from "./SidebarBg";
-import { ClientSwitcher } from "./ClientSwitcher";
 import { useReport } from "@/features/audit/ReportContext";
 import { useUIStore } from "@/state/uiStore";
 import { useAuthStore } from "@/state/authStore";
@@ -345,9 +344,7 @@ export function Sidebar() {
           collapsed ? "px-2" : "px-3",
         )}
       >
-        {/* Client switcher — highest-level context (internal build only). In a
-            scoped per-client build it renders a static label / nothing. */}
-        <ClientSwitcher collapsed={collapsed} />
+        {/* Client switcher moved to the TopBar header (Client › Report › section). */}
 
         {/* Section header — text fades, but the small section break
             (top padding) is preserved so the visual rhythm of the

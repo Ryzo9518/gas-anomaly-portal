@@ -26,6 +26,8 @@ from .models import (
     ClientData,
     ClientSession,
     Contact,
+    payload_engagements,
+    payload_reports,
 )
 
 # Contract field set for an AuditReport payload (docs/FIXTURE_CONTRACT.md §2).
@@ -59,6 +61,10 @@ class InviteBody(BaseModel):
 
 class LoadDataBody(BaseModel):
     reports: list[dict]
+    # Optional per-report engagement plans, keyed by report id. Carries the
+    # "recovered to date" / engagement-outcome / regression story so a backend
+    # client matches the fixture contract's seedEngagements (FIXTURE_CONTRACT §1).
+    engagements: dict = {}
     is_demo: bool = False
 
 
@@ -148,7 +154,22 @@ def client_reports(
     if not client or client.revoked_at is not None:
         raise HTTPException(404, {"error": "client not found", "code": "not_found"})
     data = db.get(ClientData, client.id)
-    return data.payload if data and data.payload else []
+    return payload_reports(data.payload) if data else []
+
+
+@router.get("/clients/{client_id}/engagements")
+def client_engagements(
+    client_id: str,
+    admin: dict = Depends(current_admin),
+    db: Session = Depends(get_db),
+) -> dict:
+    """A client's engagement plans (keyed by report id), for STAFF viewing.
+    Mirrors client_reports; returns {} when none are loaded. Admin-scoped."""
+    client = db.get(Client, _uid(client_id))
+    if not client or client.revoked_at is not None:
+        raise HTTPException(404, {"error": "client not found", "code": "not_found"})
+    data = db.get(ClientData, client.id)
+    return payload_engagements(data.payload) if data else {}
 
 
 @router.post("/clients/{client_id}/contacts")
@@ -239,16 +260,17 @@ def load_client_data(
     if not client or client.revoked_at is not None:
         raise HTTPException(404, {"error": "client not found", "code": "not_found"})
     _validate_reports(body.reports)
+    payload = {"reports": body.reports, "engagements": body.engagements or {}}
     existing = db.get(ClientData, client.id)
     if existing:
-        existing.payload = body.reports
+        existing.payload = payload
         existing.is_demo = body.is_demo
         existing.updated_by = admin["email"]
     else:
         db.add(
             ClientData(
                 client_id=client.id,
-                payload=body.reports,
+                payload=payload,
                 is_demo=body.is_demo,
                 updated_by=admin["email"],
             )
@@ -258,7 +280,10 @@ def load_client_data(
             event="client_data_loaded",
             actor=admin["email"],
             target_client_id=client.id,
-            detail=f"{len(body.reports)} report(s), is_demo={body.is_demo}",
+            detail=(
+                f"{len(body.reports)} report(s), "
+                f"{len(body.engagements or {})} engagement(s), is_demo={body.is_demo}"
+            ),
         )
     )
     db.commit()
@@ -320,3 +345,34 @@ def revoke_client(
     )
     db.commit()
     return {"ok": True}
+
+
+@router.delete("/clients/{client_id}")
+def delete_client(
+    client_id: str,
+    admin: dict = Depends(current_admin),
+    db: Session = Depends(get_db),
+):
+    """HARD delete a company and ALL its data — the audit payload (ClientData),
+    contacts, invites and sessions all cascade away (FK ondelete=CASCADE). This
+    is irreversible and distinct from revoke (which only soft-disables). Used to
+    actually remove a client (e.g. retiring a demo company). Audit-logged with
+    the name, since the row itself is gone after commit."""
+    cid = _uid(client_id)
+    client = db.get(Client, cid)
+    if not client:
+        raise HTTPException(404, {"error": "not found", "code": "not_found"})
+    name = client.name
+    # Record the deletion BEFORE the row vanishes (target_client_id is kept for
+    # traceability even though the client no longer exists).
+    db.add(
+        AuditLog(
+            event="client_deleted",
+            actor=admin["email"],
+            target_client_id=cid,
+            detail=f"hard delete: {name!r}",
+        )
+    )
+    db.delete(client)  # cascades to ClientData / contacts / invites / sessions
+    db.commit()
+    return {"ok": True, "deleted": name}

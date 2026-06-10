@@ -1,4 +1,4 @@
-import type { AuditReport } from "@/features/audit/reports.fixture";
+import type { AuditReport, Engagement } from "@/features/audit/reports.fixture";
 import type {
   ClientEntry,
   ClientSummary,
@@ -48,9 +48,13 @@ export const clientsStaffBff: ClientsPort = {
     const reports = await getJSON<AuditReport[]>(
       `/api/admin/clients/${id}/reports`,
     );
+    const engagements = await getJSON<Record<string, Engagement>>(
+      `/api/admin/clients/${id}/engagements`,
+    );
     return assembleEntry(
       { id: c.id, name: c.name, healthTarget: c.health_target },
       reports,
+      engagements,
     );
   },
 };

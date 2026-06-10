@@ -1,0 +1,1945 @@
+[
+  {
+    "name": "LOJAF Pty Ltd",
+    "health_target": 80,
+    "is_demo": true,
+    "reports": [
+      {
+        "id": "2024",
+        "shortLabel": "2024",
+        "cycleLabel": "2024 Baseline Audit",
+        "status": "complete",
+        "completedAt": "2024-05-20",
+        "healthScore": 39,
+        "leakageEstimate": 2100000,
+        "leakageRecoverable": 1360000,
+        "risks": {
+          "critical": 4,
+          "high": 6,
+          "medium": 3,
+          "low": 1
+        },
+        "findings": [
+          {
+            "rank": 1,
+            "title": "Duplicate supplier invoices — same supplier, document reference and amount",
+            "severity": "critical",
+            "category": "leakage",
+            "financialImpact": 565000,
+            "estimatedHours": 36,
+            "recommendedFix": "Recover confirmed duplicate payments; enable the X3 duplicate-invoice control to block same supplier+reference+amount at entry.",
+            "ownerRole": "AP Lead",
+            "status": "resolved"
+          },
+          {
+            "rank": 2,
+            "title": "Active super-user accounts holding unrestricted all-function access",
+            "severity": "critical",
+            "category": "controls",
+            "financialImpact": 0,
+            "estimatedHours": 32,
+            "recommendedFix": "Remove the all-access function profile from operational users; restrict super-user to a break-glass account with logging.",
+            "ownerRole": "X3 Administrator",
+            "status": "resolved"
+          },
+          {
+            "rank": 3,
+            "title": "Same user created the source voucher and its payment (SoD breach)",
+            "severity": "critical",
+            "category": "controls",
+            "financialImpact": 322000,
+            "estimatedHours": 28,
+            "recommendedFix": "Split voucher creation from payment authorisation; enforce a maker-checker workflow lock on the payment run.",
+            "ownerRole": "Finance Manager",
+            "status": "resolved"
+          },
+          {
+            "rank": 4,
+            "title": "Suspense / clearing accounts carrying aged (>30 day) unreconciled balances",
+            "severity": "high",
+            "category": "controls",
+            "financialImpact": 408000,
+            "estimatedHours": 26,
+            "recommendedFix": "Age and clear suspense balances; enforce a month-end zero-balance control with escalation past 30 days.",
+            "ownerRole": "Finance Manager",
+            "status": "resolved"
+          },
+          {
+            "rank": 5,
+            "title": "Overpayments — paid amount exceeds the invoiced amount",
+            "severity": "high",
+            "category": "leakage",
+            "financialImpact": 170000,
+            "estimatedHours": 20,
+            "recommendedFix": "Recover supplier overpayments; block payment lines that exceed the matched invoice value.",
+            "ownerRole": "AP Lead",
+            "status": "resolved"
+          },
+          {
+            "rank": 6,
+            "title": "Back-dated entries — validation date precedes the accounting date",
+            "severity": "high",
+            "category": "controls",
+            "financialImpact": 122000,
+            "estimatedHours": 20,
+            "recommendedFix": "Restrict back-dating to a bounded window behind secondary approval; audit the 40 violating rows.",
+            "ownerRole": "Finance Manager",
+            "status": "regressed"
+          },
+          {
+            "rank": 7,
+            "title": "Sensitive security / configuration tables without change auditing enabled",
+            "severity": "high",
+            "category": "controls",
+            "financialImpact": 0,
+            "estimatedHours": 16,
+            "recommendedFix": "Turn on field-level audit tracking for AUTILIS, ASYSACCES and bank/VAT config tables.",
+            "ownerRole": "X3 Administrator",
+            "status": "resolved"
+          },
+          {
+            "rank": 8,
+            "title": "Duplicate suppliers by normalised name (e.g. APPLE ×2, UNITED PARCEL SERVICE ×2)",
+            "severity": "medium",
+            "category": "data_quality",
+            "financialImpact": 84000,
+            "estimatedHours": 16,
+            "recommendedFix": "Run a merge review on the 6 name collisions; add a normalised-name uniqueness check at vendor creation.",
+            "ownerRole": "Master Data Owner",
+            "status": "resolved"
+          },
+          {
+            "rank": 9,
+            "title": "Vendor master records missing bank details and pay-to partner codes",
+            "severity": "medium",
+            "category": "data_quality",
+            "financialImpact": 0,
+            "estimatedHours": 12,
+            "recommendedFix": "Back-fill and validate vendor bank details; block payment runs on incomplete records.",
+            "ownerRole": "AP Lead",
+            "status": "resolved"
+          },
+          {
+            "rank": 10,
+            "title": "Negative stock at site level and expired lots beyond NRV",
+            "severity": "medium",
+            "category": "data_quality",
+            "financialImpact": 31000,
+            "estimatedHours": 12,
+            "recommendedFix": "Investigate negative on-hand; implement weekly ABC cycle counting with variance and quarterly NRV review.",
+            "ownerRole": "Inventory Controller",
+            "status": "resolved"
+          },
+          {
+            "rank": 11,
+            "title": "Customer open balances exceeding authorised credit limits",
+            "severity": "low",
+            "category": "controls",
+            "financialImpact": 0,
+            "estimatedHours": 8,
+            "recommendedFix": "Enforce the credit-limit block on order release; review the over-limit accounts.",
+            "ownerRole": "Credit Controller",
+            "status": "resolved"
+          }
+        ],
+        "uploadSubmittedAt": "2024-05-08",
+        "uploads": [
+          {
+            "fileType": "gl",
+            "fileTypeLabel": "General Ledger",
+            "fileTypeDescription": "GACCENTRY / GACCENTRYD legal & IFRS ledger journal lines (RPS01)",
+            "filename": "RPS01_gl_2024.csv",
+            "rows": 268540,
+            "sizeBytes": 58400000,
+            "state": "passed",
+            "submittedAt": "2024-05-10"
+          },
+          {
+            "fileType": "ap",
+            "fileTypeLabel": "Accounts Payable",
+            "fileTypeDescription": "PINVOICE supplier invoices + BPSUPPLIER vendor master & open items",
+            "filename": "RPS01_ap_2024.csv",
+            "rows": 31220,
+            "sizeBytes": 8700000,
+            "state": "passed",
+            "submittedAt": "2024-05-10"
+          },
+          {
+            "fileType": "po",
+            "fileTypeLabel": "Purchase Orders",
+            "fileTypeDescription": "PORDER / PORDERQ commitment lines for three-way match",
+            "filename": "RPS01_po_2024.csv",
+            "rows": 12905,
+            "sizeBytes": 3600000,
+            "state": "passed",
+            "submittedAt": "2024-05-10"
+          },
+          {
+            "fileType": "users",
+            "fileTypeLabel": "User & Access",
+            "fileTypeDescription": "AUTILIS users × ASYSACCES function profiles & all-access flags",
+            "filename": "RPS01_users_2024.csv",
+            "rows": 412,
+            "sizeBytes": 310000,
+            "state": "passed",
+            "submittedAt": "2024-05-10"
+          },
+          {
+            "fileType": "workflows",
+            "fileTypeLabel": "Audit & Config",
+            "fileTypeDescription": "AAUDITTRACK / AOBJDEF change-audit configuration & history",
+            "filename": "RPS01_config_2024.csv",
+            "rows": 9870,
+            "sizeBytes": 1900000,
+            "state": "passed",
+            "submittedAt": "2024-05-10"
+          }
+        ]
+      },
+      {
+        "id": "2025",
+        "shortLabel": "2025",
+        "cycleLabel": "2025 Annual Audit",
+        "status": "complete",
+        "completedAt": "2025-05-19",
+        "healthScore": 51,
+        "leakageEstimate": 1500000,
+        "leakageRecoverable": 940000,
+        "risks": {
+          "critical": 1,
+          "high": 6,
+          "medium": 3,
+          "low": 2
+        },
+        "findings": [
+          {
+            "rank": 1,
+            "title": "Residual duplicate-invoice exceptions on amended documents",
+            "severity": "high",
+            "category": "leakage",
+            "financialImpact": 210000,
+            "estimatedHours": 24,
+            "recommendedFix": "Extend the duplicate-invoice control to credited and amended invoices; recover the residual overpayments.",
+            "ownerRole": "AP Lead",
+            "status": "resolved"
+          },
+          {
+            "rank": 2,
+            "title": "Back-dated GL entries (REGRESSION from 2024)",
+            "severity": "high",
+            "category": "controls",
+            "financialImpact": 122000,
+            "estimatedHours": 20,
+            "recommendedFix": "Re-apply and harden the back-dating lock; the prior control was relaxed during year-end close.",
+            "ownerRole": "Finance Manager",
+            "status": "in_progress"
+          },
+          {
+            "rank": 3,
+            "title": "Suspense balances re-accumulating after month 6",
+            "severity": "high",
+            "category": "controls",
+            "financialImpact": 165000,
+            "estimatedHours": 20,
+            "recommendedFix": "Tighten the zero-balance control to weekly; assign a named owner per suspense account.",
+            "ownerRole": "Finance Manager",
+            "status": "resolved"
+          },
+          {
+            "rank": 4,
+            "title": "A small number of operational users retain supervisor flags",
+            "severity": "medium",
+            "category": "controls",
+            "financialImpact": 0,
+            "estimatedHours": 14,
+            "recommendedFix": "Separate supervisor and end-user role flags; recertify the affected accounts.",
+            "ownerRole": "X3 Administrator",
+            "status": "resolved"
+          },
+          {
+            "rank": 5,
+            "title": "Voucher=payment SoD overlap on two treasury accounts",
+            "severity": "medium",
+            "category": "controls",
+            "financialImpact": 96000,
+            "estimatedHours": 16,
+            "recommendedFix": "Close the remaining dual-role grants on the treasury payment workflow.",
+            "ownerRole": "Finance Manager",
+            "status": "resolved"
+          },
+          {
+            "rank": 6,
+            "title": "Vendor master still missing bank details on new records",
+            "severity": "medium",
+            "category": "data_quality",
+            "financialImpact": 0,
+            "estimatedHours": 10,
+            "recommendedFix": "Enforce mandatory bank-detail capture at vendor creation.",
+            "ownerRole": "AP Lead",
+            "status": "resolved"
+          },
+          {
+            "rank": 7,
+            "title": "Duplicate partner by EU VAT registration number",
+            "severity": "low",
+            "category": "data_quality",
+            "financialImpact": 0,
+            "estimatedHours": 8,
+            "recommendedFix": "Merge or document the duplicate VAT registrations.",
+            "ownerRole": "Master Data Owner",
+            "status": "resolved"
+          },
+          {
+            "rank": 8,
+            "title": "Inventory valuation gap on expired lots not fully provided",
+            "severity": "low",
+            "category": "data_quality",
+            "financialImpact": 24000,
+            "estimatedHours": 8,
+            "recommendedFix": "Apply the NRV write-down matrix automatically at period close.",
+            "ownerRole": "Inventory Controller",
+            "status": "resolved"
+          }
+        ],
+        "uploadSubmittedAt": "2025-05-05",
+        "uploads": [
+          {
+            "fileType": "gl",
+            "fileTypeLabel": "General Ledger",
+            "fileTypeDescription": "GACCENTRY / GACCENTRYD legal & IFRS ledger journal lines (RPS01)",
+            "filename": "RPS01_gl_2025.csv",
+            "rows": 268540,
+            "sizeBytes": 58400000,
+            "state": "passed",
+            "submittedAt": "2025-05-07"
+          },
+          {
+            "fileType": "ap",
+            "fileTypeLabel": "Accounts Payable",
+            "fileTypeDescription": "PINVOICE supplier invoices + BPSUPPLIER vendor master & open items",
+            "filename": "RPS01_ap_2025.csv",
+            "rows": 31220,
+            "sizeBytes": 8700000,
+            "state": "passed",
+            "submittedAt": "2025-05-07"
+          },
+          {
+            "fileType": "po",
+            "fileTypeLabel": "Purchase Orders",
+            "fileTypeDescription": "PORDER / PORDERQ commitment lines for three-way match",
+            "filename": "RPS01_po_2025.csv",
+            "rows": 12905,
+            "sizeBytes": 3600000,
+            "state": "passed",
+            "submittedAt": "2025-05-07"
+          },
+          {
+            "fileType": "users",
+            "fileTypeLabel": "User & Access",
+            "fileTypeDescription": "AUTILIS users × ASYSACCES function profiles & all-access flags",
+            "filename": "RPS01_users_2025.csv",
+            "rows": 412,
+            "sizeBytes": 310000,
+            "state": "passed",
+            "submittedAt": "2025-05-07"
+          },
+          {
+            "fileType": "workflows",
+            "fileTypeLabel": "Audit & Config",
+            "fileTypeDescription": "AAUDITTRACK / AOBJDEF change-audit configuration & history",
+            "filename": "RPS01_config_2025.csv",
+            "rows": 9870,
+            "sizeBytes": 1900000,
+            "state": "passed",
+            "submittedAt": "2025-05-07"
+          }
+        ]
+      },
+      {
+        "id": "2026",
+        "shortLabel": "2026",
+        "cycleLabel": "2026 Annual Audit",
+        "status": "complete",
+        "completedAt": "2026-06-09",
+        "healthScore": 58,
+        "leakageEstimate": 1100000,
+        "leakageRecoverable": 700000,
+        "risks": {
+          "critical": 0,
+          "high": 5,
+          "medium": 4,
+          "low": 3
+        },
+        "findings": [
+          {
+            "rank": 1,
+            "title": "Duplicate supplier invoices — same supplier, document reference and amount",
+            "severity": "high",
+            "category": "leakage",
+            "financialImpact": 408000,
+            "estimatedHours": 28,
+            "recommendedFix": "Recover the confirmed duplicate payments and block same supplier+reference+amount at entry (F-P2P-001).",
+            "ownerRole": "AP Lead",
+            "status": "open"
+          },
+          {
+            "rank": 2,
+            "title": "Suspense / clearing accounts with aged (>30 day) unreconciled balances",
+            "severity": "high",
+            "category": "controls",
+            "financialImpact": 322000,
+            "estimatedHours": 24,
+            "recommendedFix": "Clear and reconcile the aged residuals; enforce a month-end zero-balance control with >30-day escalation.",
+            "ownerRole": "Finance Manager",
+            "status": "open"
+          },
+          {
+            "rank": 3,
+            "title": "Overpayments — paid amount exceeds the invoiced amount",
+            "severity": "high",
+            "category": "leakage",
+            "financialImpact": 170000,
+            "estimatedHours": 18,
+            "recommendedFix": "Recover the supplier overpayments; block payment lines exceeding the matched invoice value.",
+            "ownerRole": "AP Lead",
+            "status": "in_progress"
+          },
+          {
+            "rank": 4,
+            "title": "Back-dated entries — validation date precedes accounting date (40 rows)",
+            "severity": "high",
+            "category": "controls",
+            "financialImpact": 122000,
+            "estimatedHours": 18,
+            "recommendedFix": "Make the back-dating lock permanent behind secondary approval; clear the 40 violating rows (F-R2R).",
+            "ownerRole": "Finance Manager",
+            "status": "open"
+          },
+          {
+            "rank": 5,
+            "title": "Same user created the source voucher and its payment (SoD breach)",
+            "severity": "high",
+            "category": "controls",
+            "financialImpact": 102000,
+            "estimatedHours": 20,
+            "recommendedFix": "Enforce maker-checker on the payment run; remove the dual-role grant that allows self-payment.",
+            "ownerRole": "Finance Manager",
+            "status": "open"
+          },
+          {
+            "rank": 6,
+            "title": "Active super-user accounts holding unrestricted all-function access",
+            "severity": "medium",
+            "category": "controls",
+            "financialImpact": 0,
+            "estimatedHours": 16,
+            "recommendedFix": "Strip the all-access function profile from operational users; restrict super-user to a logged break-glass account (F-ITGC).",
+            "ownerRole": "X3 Administrator",
+            "status": "open"
+          },
+          {
+            "rank": 7,
+            "title": "Sensitive security / configuration tables without change auditing enabled",
+            "severity": "medium",
+            "category": "controls",
+            "financialImpact": 0,
+            "estimatedHours": 12,
+            "recommendedFix": "Enable field-level audit tracking on access, bank and VAT configuration tables.",
+            "ownerRole": "X3 Administrator",
+            "status": "open"
+          },
+          {
+            "rank": 8,
+            "title": "Duplicate suppliers by normalised name (6 collisions, e.g. APPLE ×2, UPS ×2)",
+            "severity": "medium",
+            "category": "data_quality",
+            "financialImpact": 64000,
+            "estimatedHours": 14,
+            "recommendedFix": "Run a merge review on the collisions; add a normalised-name uniqueness check at vendor creation (F-P2P-012).",
+            "ownerRole": "Master Data Owner",
+            "status": "open"
+          },
+          {
+            "rank": 9,
+            "title": "Vendor master gaps — missing bank details / pay-to partner codes",
+            "severity": "medium",
+            "category": "data_quality",
+            "financialImpact": 0,
+            "estimatedHours": 10,
+            "recommendedFix": "Back-fill and validate vendor bank details; block payment runs on incomplete records.",
+            "ownerRole": "AP Lead",
+            "status": "open"
+          },
+          {
+            "rank": 10,
+            "title": "Negative stock at site level and expired lots beyond NRV",
+            "severity": "low",
+            "category": "data_quality",
+            "financialImpact": 31000,
+            "estimatedHours": 10,
+            "recommendedFix": "Investigate negative on-hand; weekly ABC cycle counting with variance and quarterly NRV review (F-INVEN-001).",
+            "ownerRole": "Inventory Controller",
+            "status": "open"
+          },
+          {
+            "rank": 11,
+            "title": "Customer open balances exceeding authorised credit limits",
+            "severity": "low",
+            "category": "controls",
+            "financialImpact": 0,
+            "estimatedHours": 8,
+            "recommendedFix": "Enforce the credit-limit block on order release; review the over-limit accounts (F-R2R-012 area).",
+            "ownerRole": "Credit Controller",
+            "status": "open"
+          },
+          {
+            "rank": 12,
+            "title": "VAT / currency configuration gaps — rates missing or not effective",
+            "severity": "low",
+            "category": "data_quality",
+            "financialImpact": 0,
+            "estimatedHours": 8,
+            "recommendedFix": "Add effective rate rows for the affected VAT codes and currencies; remove orphan rate references.",
+            "ownerRole": "Master Data Owner",
+            "status": "open"
+          }
+        ],
+        "uploadSubmittedAt": "2026-05-28",
+        "uploads": [
+          {
+            "fileType": "gl",
+            "fileTypeLabel": "General Ledger",
+            "fileTypeDescription": "GACCENTRY / GACCENTRYD legal & IFRS ledger journal lines (RPS01)",
+            "filename": "RPS01_gl_2026.csv",
+            "rows": 268540,
+            "sizeBytes": 58400000,
+            "state": "passed",
+            "submittedAt": "2026-05-30"
+          },
+          {
+            "fileType": "ap",
+            "fileTypeLabel": "Accounts Payable",
+            "fileTypeDescription": "PINVOICE supplier invoices + BPSUPPLIER vendor master & open items",
+            "filename": "RPS01_ap_2026.csv",
+            "rows": 31220,
+            "sizeBytes": 8700000,
+            "state": "passed",
+            "submittedAt": "2026-05-30"
+          },
+          {
+            "fileType": "po",
+            "fileTypeLabel": "Purchase Orders",
+            "fileTypeDescription": "PORDER / PORDERQ commitment lines for three-way match",
+            "filename": "RPS01_po_2026.csv",
+            "rows": 12905,
+            "sizeBytes": 3600000,
+            "state": "passed",
+            "submittedAt": "2026-05-30"
+          },
+          {
+            "fileType": "users",
+            "fileTypeLabel": "User & Access",
+            "fileTypeDescription": "AUTILIS users × ASYSACCES function profiles & all-access flags",
+            "filename": "RPS01_users_2026.csv",
+            "rows": 412,
+            "sizeBytes": 310000,
+            "state": "passed",
+            "submittedAt": "2026-05-30"
+          },
+          {
+            "fileType": "workflows",
+            "fileTypeLabel": "Audit & Config",
+            "fileTypeDescription": "AAUDITTRACK / AOBJDEF change-audit configuration & history",
+            "filename": "RPS01_config_2026.csv",
+            "rows": 9870,
+            "sizeBytes": 1900000,
+            "state": "passed",
+            "submittedAt": "2026-05-30"
+          }
+        ]
+      }
+    ],
+    "engagements": {
+      "2024": {
+        "reportId": "2024",
+        "status": "complete",
+        "submittedAt": "2024-06-10",
+        "improvementHoursPerMonth": 34,
+        "supportHoursPerMonth": 16,
+        "months": 6,
+        "estimatedSavings": 1671000,
+        "actualSavings": 1434000,
+        "findings": [
+          {
+            "findingRank": 1,
+            "status": "resolved",
+            "estimatedImpact": 565000,
+            "actualImpact": 528000
+          },
+          {
+            "findingRank": 2,
+            "status": "resolved",
+            "estimatedImpact": 0,
+            "actualImpact": 0
+          },
+          {
+            "findingRank": 3,
+            "status": "resolved",
+            "estimatedImpact": 322000,
+            "actualImpact": 300000
+          },
+          {
+            "findingRank": 4,
+            "status": "resolved",
+            "estimatedImpact": 408000,
+            "actualImpact": 372000
+          },
+          {
+            "findingRank": 5,
+            "status": "resolved",
+            "estimatedImpact": 170000,
+            "actualImpact": 158000
+          },
+          {
+            "findingRank": 6,
+            "status": "regressed",
+            "estimatedImpact": 122000,
+            "actualImpact": 0
+          },
+          {
+            "findingRank": 7,
+            "status": "resolved",
+            "estimatedImpact": 0,
+            "actualImpact": 0
+          },
+          {
+            "findingRank": 8,
+            "status": "resolved",
+            "estimatedImpact": 84000,
+            "actualImpact": 76000
+          },
+          {
+            "findingRank": 9,
+            "status": "skipped",
+            "estimatedImpact": 0
+          },
+          {
+            "findingRank": 10,
+            "status": "skipped",
+            "estimatedImpact": 31000
+          },
+          {
+            "findingRank": 11,
+            "status": "skipped",
+            "estimatedImpact": 0
+          }
+        ]
+      },
+      "2025": {
+        "reportId": "2025",
+        "status": "complete",
+        "submittedAt": "2025-06-16",
+        "improvementHoursPerMonth": 28,
+        "supportHoursPerMonth": 16,
+        "months": 9,
+        "estimatedSavings": 593000,
+        "actualSavings": 438000,
+        "findings": [
+          {
+            "findingRank": 1,
+            "status": "resolved",
+            "estimatedImpact": 210000,
+            "actualImpact": 198000
+          },
+          {
+            "findingRank": 2,
+            "status": "included",
+            "estimatedImpact": 122000
+          },
+          {
+            "findingRank": 3,
+            "status": "resolved",
+            "estimatedImpact": 165000,
+            "actualImpact": 152000
+          },
+          {
+            "findingRank": 4,
+            "status": "resolved",
+            "estimatedImpact": 0,
+            "actualImpact": 0
+          },
+          {
+            "findingRank": 5,
+            "status": "resolved",
+            "estimatedImpact": 96000,
+            "actualImpact": 88000
+          },
+          {
+            "findingRank": 6,
+            "status": "resolved",
+            "estimatedImpact": 0,
+            "actualImpact": 0
+          },
+          {
+            "findingRank": 7,
+            "status": "skipped",
+            "estimatedImpact": 0
+          },
+          {
+            "findingRank": 8,
+            "status": "skipped",
+            "estimatedImpact": 24000
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Tourvest Travel Group",
+    "health_target": 82,
+    "is_demo": true,
+    "reports": [
+      {
+        "id": "2024",
+        "shortLabel": "2024",
+        "cycleLabel": "2024 Baseline Audit",
+        "status": "complete",
+        "completedAt": "2024-05-14",
+        "healthScore": 48,
+        "leakageEstimate": 1400000,
+        "leakageRecoverable": 920000,
+        "risks": {
+          "critical": 3,
+          "high": 4,
+          "medium": 2,
+          "low": 1
+        },
+        "findings": [
+          {
+            "rank": 1,
+            "title": "Intercompany leakage — same vendor paid by multiple legal entities",
+            "severity": "critical",
+            "category": "leakage",
+            "financialImpact": 410000,
+            "estimatedHours": 40,
+            "recommendedFix": "Reconcile the duplicated vendor payments across FR/NA/DE entities; net intercompany positions and lock cross-entity vendor creation behind a single master.",
+            "ownerRole": "Group Financial Controller",
+            "status": "resolved"
+          },
+          {
+            "rank": 2,
+            "title": "Suspense / clearing accounts carrying material non-zero balances",
+            "severity": "critical",
+            "category": "controls",
+            "financialImpact": 295000,
+            "estimatedHours": 32,
+            "recommendedFix": "Age and clear suspense balances; enforce a month-end zero-balance control with sign-off on any residual.",
+            "ownerRole": "Finance Manager",
+            "status": "resolved"
+          },
+          {
+            "rank": 3,
+            "title": "No segregation of duties across the AP module",
+            "severity": "critical",
+            "category": "controls",
+            "financialImpact": 220000,
+            "estimatedHours": 32,
+            "recommendedFix": "Split invoice creation from approval; enforce a role-based workflow lock.",
+            "ownerRole": "Finance Manager",
+            "status": "resolved"
+          },
+          {
+            "rank": 4,
+            "title": "Large AR (management-fee) invoices where creator equals approver",
+            "severity": "high",
+            "category": "controls",
+            "financialImpact": 165000,
+            "estimatedHours": 24,
+            "recommendedFix": "Add a maker-checker on all fee invoices over R100K; route to an independent reviewer.",
+            "ownerRole": "Revenue Controller",
+            "status": "resolved"
+          },
+          {
+            "rank": 5,
+            "title": "Dormant accounts retaining high-privilege function profiles",
+            "severity": "high",
+            "category": "controls",
+            "financialImpact": 0,
+            "estimatedHours": 16,
+            "recommendedFix": "Deactivate accounts idle 90+ days; quarterly privilege recertification.",
+            "ownerRole": "IT Lead",
+            "status": "resolved"
+          },
+          {
+            "rank": 6,
+            "title": "Trial-balance imbalance by company × period (consolidation integrity)",
+            "severity": "high",
+            "category": "data_quality",
+            "financialImpact": 88000,
+            "estimatedHours": 20,
+            "recommendedFix": "Trace the company/period imbalances; correct mispostings before close and gate consolidation on a balanced TB.",
+            "ownerRole": "Group Financial Controller",
+            "status": "resolved"
+          },
+          {
+            "rank": 7,
+            "title": "Back-dated entries (accounting date earlier than creation date)",
+            "severity": "high",
+            "category": "controls",
+            "financialImpact": 72000,
+            "estimatedHours": 18,
+            "recommendedFix": "Restrict back-dating to a bounded window behind secondary approval; audit historic back-dated GL.",
+            "ownerRole": "Finance Manager",
+            "status": "regressed"
+          },
+          {
+            "rank": 8,
+            "title": "AR open items > 1 year old (potential write-off / overstated assets)",
+            "severity": "medium",
+            "category": "data_quality",
+            "financialImpact": 54000,
+            "estimatedHours": 16,
+            "recommendedFix": "Review and provide/write off aged debtors; introduce a 12-month ageing trigger.",
+            "ownerRole": "Revenue Controller",
+            "status": "resolved"
+          },
+          {
+            "rank": 9,
+            "title": "Benford's-Law deviation on GL line amounts (manual-entry clustering)",
+            "severity": "medium",
+            "category": "data_quality",
+            "financialImpact": 0,
+            "estimatedHours": 12,
+            "recommendedFix": "Investigate the leading-digit clusters; focus review on manual journals around thresholds.",
+            "ownerRole": "Internal Audit",
+            "status": "resolved"
+          },
+          {
+            "rank": 10,
+            "title": "Accounting periods still open in prior fiscal years",
+            "severity": "low",
+            "category": "efficiency",
+            "financialImpact": 0,
+            "estimatedHours": 8,
+            "recommendedFix": "Close prior-year periods; enforce a hard close calendar.",
+            "ownerRole": "Finance Manager",
+            "status": "resolved"
+          }
+        ],
+        "uploadSubmittedAt": "2024-05-02",
+        "uploads": [
+          {
+            "fileType": "gl",
+            "fileTypeLabel": "General Ledger",
+            "fileTypeDescription": "GACCENTRY / GACCENTRYD journal lines",
+            "filename": "tourvest_gl_2024.csv",
+            "rows": 184322,
+            "sizeBytes": 41200000,
+            "state": "passed",
+            "submittedAt": "2024-05-04"
+          },
+          {
+            "fileType": "ap",
+            "fileTypeLabel": "Accounts Payable",
+            "fileTypeDescription": "BPSUPPLIER + PINVOICE open items",
+            "filename": "tourvest_ap_2024.csv",
+            "rows": 22104,
+            "sizeBytes": 6900000,
+            "state": "passed",
+            "submittedAt": "2024-05-04"
+          },
+          {
+            "fileType": "po",
+            "fileTypeLabel": "Purchase Orders",
+            "fileTypeDescription": "PORDER / PORDERQ commitment lines",
+            "filename": "tourvest_po_2024.csv",
+            "rows": 9842,
+            "sizeBytes": 3100000,
+            "state": "passed",
+            "submittedAt": "2024-05-04"
+          },
+          {
+            "fileType": "users",
+            "fileTypeLabel": "User & Access",
+            "fileTypeDescription": "AUTILIS menu × function profiles",
+            "filename": "tourvest_users_2024.csv",
+            "rows": 318,
+            "sizeBytes": 240000,
+            "state": "passed",
+            "submittedAt": "2024-05-04"
+          },
+          {
+            "fileType": "workflows",
+            "fileTypeLabel": "Workflow & Approvals",
+            "fileTypeDescription": "AWRKHISTO approval trail",
+            "filename": "tourvest_wf_2024.csv",
+            "rows": 14550,
+            "sizeBytes": 2400000,
+            "state": "passed",
+            "submittedAt": "2024-05-04"
+          }
+        ]
+      },
+      {
+        "id": "2025",
+        "shortLabel": "2025",
+        "cycleLabel": "2025 Annual Audit",
+        "status": "complete",
+        "completedAt": "2025-05-12",
+        "healthScore": 60,
+        "leakageEstimate": 980000,
+        "leakageRecoverable": 610000,
+        "risks": {
+          "critical": 0,
+          "high": 3,
+          "medium": 3,
+          "low": 2
+        },
+        "findings": [
+          {
+            "rank": 1,
+            "title": "Residual intercompany imbalances on netting accounts",
+            "severity": "high",
+            "category": "leakage",
+            "financialImpact": 180000,
+            "estimatedHours": 28,
+            "recommendedFix": "Automate the intercompany netting reconciliation; alert on any non-netting balance over R25K.",
+            "ownerRole": "Group Financial Controller",
+            "status": "resolved"
+          },
+          {
+            "rank": 2,
+            "title": "Suspense balances re-accumulating after month 6",
+            "severity": "high",
+            "category": "controls",
+            "financialImpact": 120000,
+            "estimatedHours": 20,
+            "recommendedFix": "Tighten the zero-balance control to weekly; assign a named owner per suspense account.",
+            "ownerRole": "Finance Manager",
+            "status": "resolved"
+          },
+          {
+            "rank": 3,
+            "title": "Back-dated GL entries (REGRESSION from 2024)",
+            "severity": "high",
+            "category": "controls",
+            "financialImpact": 72000,
+            "estimatedHours": 18,
+            "recommendedFix": "Re-apply and harden the back-dating lock; the prior control was relaxed during year-end.",
+            "ownerRole": "Finance Manager",
+            "status": "in_progress"
+          },
+          {
+            "rank": 4,
+            "title": "Management-fee invoices missing independent approval on edge cases",
+            "severity": "medium",
+            "category": "controls",
+            "financialImpact": 96000,
+            "estimatedHours": 16,
+            "recommendedFix": "Close the workflow gap for amended/credited fee invoices.",
+            "ownerRole": "Revenue Controller",
+            "status": "resolved"
+          },
+          {
+            "rank": 5,
+            "title": "Vendor master records missing bank-account details",
+            "severity": "medium",
+            "category": "data_quality",
+            "financialImpact": 44000,
+            "estimatedHours": 12,
+            "recommendedFix": "Back-fill and validate vendor bank details; block payment runs on incomplete records.",
+            "ownerRole": "AP Lead",
+            "status": "resolved"
+          },
+          {
+            "rank": 6,
+            "title": "Aged AR not provided per policy",
+            "severity": "medium",
+            "category": "data_quality",
+            "financialImpact": 38000,
+            "estimatedHours": 12,
+            "recommendedFix": "Apply the ageing-provision matrix automatically at close.",
+            "ownerRole": "Revenue Controller",
+            "status": "resolved"
+          },
+          {
+            "rank": 7,
+            "title": "Customisation manifest drift (non-vanilla objects undocumented)",
+            "severity": "low",
+            "category": "efficiency",
+            "financialImpact": 0,
+            "estimatedHours": 10,
+            "recommendedFix": "Document and review specifics; flag undocumented customisations before upgrade.",
+            "ownerRole": "X3 Administrator",
+            "status": "resolved"
+          },
+          {
+            "rank": 8,
+            "title": "Period-end posting spike (last-week effect)",
+            "severity": "low",
+            "category": "efficiency",
+            "financialImpact": 0,
+            "estimatedHours": 8,
+            "recommendedFix": "Smooth the close calendar; pre-post recurring journals.",
+            "ownerRole": "Finance Manager",
+            "status": "resolved"
+          }
+        ],
+        "uploadSubmittedAt": "2025-04-28",
+        "uploads": [
+          {
+            "fileType": "gl",
+            "fileTypeLabel": "General Ledger",
+            "fileTypeDescription": "GACCENTRY / GACCENTRYD journal lines",
+            "filename": "tourvest_gl_2025.csv",
+            "rows": 184322,
+            "sizeBytes": 41200000,
+            "state": "passed",
+            "submittedAt": "2025-04-30"
+          },
+          {
+            "fileType": "ap",
+            "fileTypeLabel": "Accounts Payable",
+            "fileTypeDescription": "BPSUPPLIER + PINVOICE open items",
+            "filename": "tourvest_ap_2025.csv",
+            "rows": 22104,
+            "sizeBytes": 6900000,
+            "state": "passed",
+            "submittedAt": "2025-04-30"
+          },
+          {
+            "fileType": "po",
+            "fileTypeLabel": "Purchase Orders",
+            "fileTypeDescription": "PORDER / PORDERQ commitment lines",
+            "filename": "tourvest_po_2025.csv",
+            "rows": 9842,
+            "sizeBytes": 3100000,
+            "state": "passed",
+            "submittedAt": "2025-04-30"
+          },
+          {
+            "fileType": "users",
+            "fileTypeLabel": "User & Access",
+            "fileTypeDescription": "AUTILIS menu × function profiles",
+            "filename": "tourvest_users_2025.csv",
+            "rows": 318,
+            "sizeBytes": 240000,
+            "state": "passed",
+            "submittedAt": "2025-04-30"
+          },
+          {
+            "fileType": "workflows",
+            "fileTypeLabel": "Workflow & Approvals",
+            "fileTypeDescription": "AWRKHISTO approval trail",
+            "filename": "tourvest_wf_2025.csv",
+            "rows": 14550,
+            "sizeBytes": 2400000,
+            "state": "passed",
+            "submittedAt": "2025-04-30"
+          }
+        ]
+      },
+      {
+        "id": "2026",
+        "shortLabel": "2026",
+        "cycleLabel": "2026 Annual Audit",
+        "status": "complete",
+        "completedAt": "2026-05-11",
+        "healthScore": 71,
+        "leakageEstimate": 640000,
+        "leakageRecoverable": 410000,
+        "risks": {
+          "critical": 0,
+          "high": 2,
+          "medium": 3,
+          "low": 2
+        },
+        "findings": [
+          {
+            "rank": 1,
+            "title": "Back-dated GL entries still possible at year-end (carried gap)",
+            "severity": "high",
+            "category": "controls",
+            "financialImpact": 64000,
+            "estimatedHours": 16,
+            "recommendedFix": "Make the year-end back-dating lock permanent; remove the manual override.",
+            "ownerRole": "Finance Manager",
+            "status": "open"
+          },
+          {
+            "rank": 2,
+            "title": "Intercompany netting exceptions on two dormant entities",
+            "severity": "high",
+            "category": "leakage",
+            "financialImpact": 110000,
+            "estimatedHours": 22,
+            "recommendedFix": "Resolve the residual positions on the dormant entities and close them in X3.",
+            "ownerRole": "Group Financial Controller",
+            "status": "open"
+          },
+          {
+            "rank": 3,
+            "title": "Users with both supervisor and end-user role flags (privilege concentration)",
+            "severity": "medium",
+            "category": "controls",
+            "financialImpact": 0,
+            "estimatedHours": 14,
+            "recommendedFix": "Separate supervisor and operational roles; recertify the affected users.",
+            "ownerRole": "IT Lead",
+            "status": "open"
+          },
+          {
+            "rank": 4,
+            "title": "Suspense account 18900 not fully cleared at H1",
+            "severity": "medium",
+            "category": "controls",
+            "financialImpact": 58000,
+            "estimatedHours": 12,
+            "recommendedFix": "Clear and reclassify the residual; add it to the weekly zero-balance check.",
+            "ownerRole": "Finance Manager",
+            "status": "in_progress"
+          },
+          {
+            "rank": 5,
+            "title": "Aged AR write-off candidates above provision",
+            "severity": "medium",
+            "category": "data_quality",
+            "financialImpact": 42000,
+            "estimatedHours": 10,
+            "recommendedFix": "Write off the irrecoverable balances; tighten the credit-control follow-up.",
+            "ownerRole": "Revenue Controller",
+            "status": "open"
+          },
+          {
+            "rank": 6,
+            "title": "Two vendors registered under the same VAT-ID",
+            "severity": "low",
+            "category": "data_quality",
+            "financialImpact": 0,
+            "estimatedHours": 6,
+            "recommendedFix": "Merge or document the duplicate registrations.",
+            "ownerRole": "AP Lead",
+            "status": "open"
+          },
+          {
+            "rank": 7,
+            "title": "GL postings outside business hours (00:00–06:00)",
+            "severity": "low",
+            "category": "controls",
+            "financialImpact": 0,
+            "estimatedHours": 8,
+            "recommendedFix": "Review the out-of-hours batch; confirm it is scheduled, not manual.",
+            "ownerRole": "Internal Audit",
+            "status": "open"
+          }
+        ],
+        "uploadSubmittedAt": "2026-04-27",
+        "uploads": [
+          {
+            "fileType": "gl",
+            "fileTypeLabel": "General Ledger",
+            "fileTypeDescription": "GACCENTRY / GACCENTRYD journal lines",
+            "filename": "tourvest_gl_2026.csv",
+            "rows": 184322,
+            "sizeBytes": 41200000,
+            "state": "passed",
+            "submittedAt": "2026-04-29"
+          },
+          {
+            "fileType": "ap",
+            "fileTypeLabel": "Accounts Payable",
+            "fileTypeDescription": "BPSUPPLIER + PINVOICE open items",
+            "filename": "tourvest_ap_2026.csv",
+            "rows": 22104,
+            "sizeBytes": 6900000,
+            "state": "passed",
+            "submittedAt": "2026-04-29"
+          },
+          {
+            "fileType": "po",
+            "fileTypeLabel": "Purchase Orders",
+            "fileTypeDescription": "PORDER / PORDERQ commitment lines",
+            "filename": "tourvest_po_2026.csv",
+            "rows": 9842,
+            "sizeBytes": 3100000,
+            "state": "passed",
+            "submittedAt": "2026-04-29"
+          },
+          {
+            "fileType": "users",
+            "fileTypeLabel": "User & Access",
+            "fileTypeDescription": "AUTILIS menu × function profiles",
+            "filename": "tourvest_users_2026.csv",
+            "rows": 318,
+            "sizeBytes": 240000,
+            "state": "passed",
+            "submittedAt": "2026-04-29"
+          },
+          {
+            "fileType": "workflows",
+            "fileTypeLabel": "Workflow & Approvals",
+            "fileTypeDescription": "AWRKHISTO approval trail",
+            "filename": "tourvest_wf_2026.csv",
+            "rows": 14550,
+            "sizeBytes": 2400000,
+            "state": "passed",
+            "submittedAt": "2026-04-29"
+          }
+        ]
+      }
+    ],
+    "engagements": {
+      "2024": {
+        "reportId": "2024",
+        "status": "complete",
+        "submittedAt": "2024-06-03",
+        "improvementHoursPerMonth": 32,
+        "supportHoursPerMonth": 16,
+        "months": 6,
+        "estimatedSavings": 1250000,
+        "actualSavings": 1093000,
+        "findings": [
+          {
+            "findingRank": 1,
+            "status": "resolved",
+            "estimatedImpact": 410000,
+            "actualImpact": 388000
+          },
+          {
+            "findingRank": 2,
+            "status": "resolved",
+            "estimatedImpact": 295000,
+            "actualImpact": 270000
+          },
+          {
+            "findingRank": 3,
+            "status": "resolved",
+            "estimatedImpact": 220000,
+            "actualImpact": 205000
+          },
+          {
+            "findingRank": 4,
+            "status": "resolved",
+            "estimatedImpact": 165000,
+            "actualImpact": 150000
+          },
+          {
+            "findingRank": 5,
+            "status": "resolved",
+            "estimatedImpact": 0,
+            "actualImpact": 0
+          },
+          {
+            "findingRank": 6,
+            "status": "resolved",
+            "estimatedImpact": 88000,
+            "actualImpact": 80000
+          },
+          {
+            "findingRank": 7,
+            "status": "regressed",
+            "estimatedImpact": 72000,
+            "actualImpact": 0
+          },
+          {
+            "findingRank": 8,
+            "status": "skipped",
+            "estimatedImpact": 54000
+          },
+          {
+            "findingRank": 9,
+            "status": "resolved",
+            "estimatedImpact": 0,
+            "actualImpact": 0
+          },
+          {
+            "findingRank": 10,
+            "status": "skipped",
+            "estimatedImpact": 0
+          }
+        ]
+      },
+      "2025": {
+        "reportId": "2025",
+        "status": "complete",
+        "submittedAt": "2025-06-09",
+        "improvementHoursPerMonth": 26,
+        "supportHoursPerMonth": 16,
+        "months": 9,
+        "estimatedSavings": 550000,
+        "actualSavings": 451000,
+        "findings": [
+          {
+            "findingRank": 1,
+            "status": "resolved",
+            "estimatedImpact": 180000,
+            "actualImpact": 172000
+          },
+          {
+            "findingRank": 2,
+            "status": "resolved",
+            "estimatedImpact": 120000,
+            "actualImpact": 112000
+          },
+          {
+            "findingRank": 3,
+            "status": "included",
+            "estimatedImpact": 72000
+          },
+          {
+            "findingRank": 4,
+            "status": "resolved",
+            "estimatedImpact": 96000,
+            "actualImpact": 90000
+          },
+          {
+            "findingRank": 5,
+            "status": "resolved",
+            "estimatedImpact": 44000,
+            "actualImpact": 41000
+          },
+          {
+            "findingRank": 6,
+            "status": "resolved",
+            "estimatedImpact": 38000,
+            "actualImpact": 36000
+          },
+          {
+            "findingRank": 7,
+            "status": "skipped",
+            "estimatedImpact": 0
+          },
+          {
+            "findingRank": 8,
+            "status": "skipped",
+            "estimatedImpact": 0
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Gold Crown Foods (KFC Franchise Group)",
+    "health_target": 78,
+    "is_demo": true,
+    "reports": [
+      {
+        "id": "2024",
+        "shortLabel": "2024",
+        "cycleLabel": "2024 Baseline Audit",
+        "status": "complete",
+        "completedAt": "2024-06-18",
+        "healthScore": 44,
+        "leakageEstimate": 1100000,
+        "leakageRecoverable": 740000,
+        "risks": {
+          "critical": 3,
+          "high": 3,
+          "medium": 3,
+          "low": 1
+        },
+        "findings": [
+          {
+            "rank": 1,
+            "title": "Goods receipts > 90 days without a matching AP invoice (accrual exposure)",
+            "severity": "critical",
+            "category": "leakage",
+            "financialImpact": 320000,
+            "estimatedHours": 36,
+            "recommendedFix": "Reconcile GRNI; chase or reverse stale receipts and book the true accrual. Add a 60-day GRNI ageing alert.",
+            "ownerRole": "Supply Chain Controller",
+            "status": "resolved"
+          },
+          {
+            "rank": 2,
+            "title": "Duplicate vendor invoice numbers (potential duplicate payment)",
+            "severity": "critical",
+            "category": "leakage",
+            "financialImpact": 188000,
+            "estimatedHours": 28,
+            "recommendedFix": "Recover the duplicate payments; enforce a unique (vendor, invoice-no) constraint and a pre-payment duplicate check.",
+            "ownerRole": "AP Lead",
+            "status": "resolved"
+          },
+          {
+            "rank": 3,
+            "title": "Three-way match failures (PO / Goods-Receipt / Invoice mismatch)",
+            "severity": "critical",
+            "category": "controls",
+            "financialImpact": 142000,
+            "estimatedHours": 32,
+            "recommendedFix": "Enforce tolerance-based three-way match before payment; block off-match invoices.",
+            "ownerRole": "Supply Chain Controller",
+            "status": "resolved"
+          },
+          {
+            "rank": 4,
+            "title": "POs clustered just below the standard approval threshold",
+            "severity": "high",
+            "category": "controls",
+            "financialImpact": 96000,
+            "estimatedHours": 20,
+            "recommendedFix": "Investigate threshold-splitting; add cumulative-spend approval logic per vendor/period.",
+            "ownerRole": "Procurement",
+            "status": "resolved"
+          },
+          {
+            "rank": 5,
+            "title": "Weekend GL postings on store cash accounts (out-of-hours fraud indicator)",
+            "severity": "high",
+            "category": "controls",
+            "financialImpact": 78000,
+            "estimatedHours": 18,
+            "recommendedFix": "Review weekend cash postings per store; require maker-checker on cash journals.",
+            "ownerRole": "Finance Manager",
+            "status": "regressed"
+          },
+          {
+            "rank": 6,
+            "title": "Items with negative or zero cost price (CPRAMT_0)",
+            "severity": "high",
+            "category": "data_quality",
+            "financialImpact": 64000,
+            "estimatedHours": 16,
+            "recommendedFix": "Correct the zero/negative standard costs; gate item activation on a valid cost.",
+            "ownerRole": "Stock Controller",
+            "status": "resolved"
+          },
+          {
+            "rank": 7,
+            "title": "Stock items with no movement in > 365 days (slow / obsolete)",
+            "severity": "medium",
+            "category": "efficiency",
+            "financialImpact": 52000,
+            "estimatedHours": 14,
+            "recommendedFix": "Write down obsolete stock; introduce a slow-mover review at each store.",
+            "ownerRole": "Stock Controller",
+            "status": "resolved"
+          },
+          {
+            "rank": 8,
+            "title": "Vendor master records missing bank-account details",
+            "severity": "medium",
+            "category": "data_quality",
+            "financialImpact": 0,
+            "estimatedHours": 10,
+            "recommendedFix": "Back-fill and validate vendor bank details; block payment on incomplete records.",
+            "ownerRole": "AP Lead",
+            "status": "resolved"
+          },
+          {
+            "rank": 9,
+            "title": "Royalty / marketing-levy accruals understated vs sales",
+            "severity": "medium",
+            "category": "leakage",
+            "financialImpact": 46000,
+            "estimatedHours": 12,
+            "recommendedFix": "Reconcile levy accruals to franchised sales; automate the monthly accrual.",
+            "ownerRole": "Finance Manager",
+            "status": "resolved"
+          },
+          {
+            "rank": 10,
+            "title": "Large transactions with zero VAT despite a configured VAT account",
+            "severity": "low",
+            "category": "data_quality",
+            "financialImpact": 0,
+            "estimatedHours": 8,
+            "recommendedFix": "Review zero-VAT high-value lines; correct tax determination.",
+            "ownerRole": "Finance Manager",
+            "status": "resolved"
+          }
+        ],
+        "uploadSubmittedAt": "2024-06-05",
+        "uploads": [
+          {
+            "fileType": "gl",
+            "fileTypeLabel": "General Ledger",
+            "fileTypeDescription": "GACCENTRY / GACCENTRYD journal lines (all stores)",
+            "filename": "goldcrown_gl_2024.csv",
+            "rows": 412880,
+            "sizeBytes": 92000000,
+            "state": "passed",
+            "submittedAt": "2024-06-07"
+          },
+          {
+            "fileType": "ap",
+            "fileTypeLabel": "Accounts Payable",
+            "fileTypeDescription": "BPSUPPLIER + PINVOICE (food, packaging, royalties)",
+            "filename": "goldcrown_ap_2024.csv",
+            "rows": 64210,
+            "sizeBytes": 18400000,
+            "state": "passed",
+            "submittedAt": "2024-06-07"
+          },
+          {
+            "fileType": "po",
+            "fileTypeLabel": "Purchase / Goods Receipt",
+            "fileTypeDescription": "PORDER + PRECEIPT three-way-match population",
+            "filename": "goldcrown_po_2024.csv",
+            "rows": 88902,
+            "sizeBytes": 24100000,
+            "state": "passed",
+            "submittedAt": "2024-06-07"
+          },
+          {
+            "fileType": "users",
+            "fileTypeLabel": "User & Access",
+            "fileTypeDescription": "AUTILIS store-manager menu × function profiles",
+            "filename": "goldcrown_users_2024.csv",
+            "rows": 642,
+            "sizeBytes": 410000,
+            "state": "passed",
+            "submittedAt": "2024-06-07"
+          },
+          {
+            "fileType": "workflows",
+            "fileTypeLabel": "Workflow & Approvals",
+            "fileTypeDescription": "AWRKHISTO PO approval trail",
+            "filename": "goldcrown_wf_2024.csv",
+            "rows": 29330,
+            "sizeBytes": 4800000,
+            "state": "passed",
+            "submittedAt": "2024-06-07"
+          }
+        ]
+      },
+      {
+        "id": "2025",
+        "shortLabel": "2025",
+        "cycleLabel": "2025 Annual Audit",
+        "status": "complete",
+        "completedAt": "2025-06-16",
+        "healthScore": 57,
+        "leakageEstimate": 760000,
+        "leakageRecoverable": 470000,
+        "risks": {
+          "critical": 0,
+          "high": 3,
+          "medium": 3,
+          "low": 2
+        },
+        "findings": [
+          {
+            "rank": 1,
+            "title": "Residual GRNI ageing on three high-volume stores",
+            "severity": "high",
+            "category": "leakage",
+            "financialImpact": 140000,
+            "estimatedHours": 24,
+            "recommendedFix": "Extend the GRNI alert to store level; assign clearing ownership per store manager.",
+            "ownerRole": "Supply Chain Controller",
+            "status": "resolved"
+          },
+          {
+            "rank": 2,
+            "title": "Duplicate-payment control not covering credit notes",
+            "severity": "high",
+            "category": "leakage",
+            "financialImpact": 88000,
+            "estimatedHours": 18,
+            "recommendedFix": "Extend the duplicate check to credits and re-issued invoices.",
+            "ownerRole": "AP Lead",
+            "status": "resolved"
+          },
+          {
+            "rank": 3,
+            "title": "Weekend cash postings (REGRESSION from 2024)",
+            "severity": "high",
+            "category": "controls",
+            "financialImpact": 78000,
+            "estimatedHours": 18,
+            "recommendedFix": "Re-apply the maker-checker; the weekend lock was disabled during a POS rollout.",
+            "ownerRole": "Finance Manager",
+            "status": "in_progress"
+          },
+          {
+            "rank": 4,
+            "title": "Three-way-match tolerance set too wide on packaging vendors",
+            "severity": "medium",
+            "category": "controls",
+            "financialImpact": 60000,
+            "estimatedHours": 14,
+            "recommendedFix": "Tighten tolerance bands; review packaging spend variances.",
+            "ownerRole": "Procurement",
+            "status": "resolved"
+          },
+          {
+            "rank": 5,
+            "title": "Obsolete-stock provision not applied at all sites",
+            "severity": "medium",
+            "category": "efficiency",
+            "financialImpact": 44000,
+            "estimatedHours": 12,
+            "recommendedFix": "Apply the slow-mover write-down policy group-wide.",
+            "ownerRole": "Stock Controller",
+            "status": "resolved"
+          },
+          {
+            "rank": 6,
+            "title": "Vendors paid by multiple store entities (intercompany leakage)",
+            "severity": "medium",
+            "category": "leakage",
+            "financialImpact": 50000,
+            "estimatedHours": 14,
+            "recommendedFix": "Consolidate shared vendors; net intercompany store balances.",
+            "ownerRole": "Finance Manager",
+            "status": "resolved"
+          },
+          {
+            "rank": 7,
+            "title": "Period-end posting spike at month close",
+            "severity": "low",
+            "category": "efficiency",
+            "financialImpact": 0,
+            "estimatedHours": 8,
+            "recommendedFix": "Pre-post recurring journals; smooth the close.",
+            "ownerRole": "Finance Manager",
+            "status": "resolved"
+          },
+          {
+            "rank": 8,
+            "title": "Store-manager accounts with stale passwords (>180 days)",
+            "severity": "low",
+            "category": "controls",
+            "financialImpact": 0,
+            "estimatedHours": 8,
+            "recommendedFix": "Enforce rotation; expire stale credentials.",
+            "ownerRole": "IT Lead",
+            "status": "resolved"
+          }
+        ],
+        "uploadSubmittedAt": "2025-06-02",
+        "uploads": [
+          {
+            "fileType": "gl",
+            "fileTypeLabel": "General Ledger",
+            "fileTypeDescription": "GACCENTRY / GACCENTRYD journal lines (all stores)",
+            "filename": "goldcrown_gl_2025.csv",
+            "rows": 412880,
+            "sizeBytes": 92000000,
+            "state": "passed",
+            "submittedAt": "2025-06-04"
+          },
+          {
+            "fileType": "ap",
+            "fileTypeLabel": "Accounts Payable",
+            "fileTypeDescription": "BPSUPPLIER + PINVOICE (food, packaging, royalties)",
+            "filename": "goldcrown_ap_2025.csv",
+            "rows": 64210,
+            "sizeBytes": 18400000,
+            "state": "passed",
+            "submittedAt": "2025-06-04"
+          },
+          {
+            "fileType": "po",
+            "fileTypeLabel": "Purchase / Goods Receipt",
+            "fileTypeDescription": "PORDER + PRECEIPT three-way-match population",
+            "filename": "goldcrown_po_2025.csv",
+            "rows": 88902,
+            "sizeBytes": 24100000,
+            "state": "passed",
+            "submittedAt": "2025-06-04"
+          },
+          {
+            "fileType": "users",
+            "fileTypeLabel": "User & Access",
+            "fileTypeDescription": "AUTILIS store-manager menu × function profiles",
+            "filename": "goldcrown_users_2025.csv",
+            "rows": 642,
+            "sizeBytes": 410000,
+            "state": "passed",
+            "submittedAt": "2025-06-04"
+          },
+          {
+            "fileType": "workflows",
+            "fileTypeLabel": "Workflow & Approvals",
+            "fileTypeDescription": "AWRKHISTO PO approval trail",
+            "filename": "goldcrown_wf_2025.csv",
+            "rows": 29330,
+            "sizeBytes": 4800000,
+            "state": "passed",
+            "submittedAt": "2025-06-04"
+          }
+        ]
+      },
+      {
+        "id": "2026",
+        "shortLabel": "2026",
+        "cycleLabel": "2026 Annual Audit",
+        "status": "complete",
+        "completedAt": "2026-06-15",
+        "healthScore": 69,
+        "leakageEstimate": 510000,
+        "leakageRecoverable": 330000,
+        "risks": {
+          "critical": 0,
+          "high": 2,
+          "medium": 3,
+          "low": 2
+        },
+        "findings": [
+          {
+            "rank": 1,
+            "title": "Weekend cash postings still un-gated on two regions",
+            "severity": "high",
+            "category": "controls",
+            "financialImpact": 60000,
+            "estimatedHours": 16,
+            "recommendedFix": "Roll the maker-checker to the remaining regions; remove the POS-rollout exemption.",
+            "ownerRole": "Finance Manager",
+            "status": "open"
+          },
+          {
+            "rank": 2,
+            "title": "GRNI > 90 days creeping back on new-store openings",
+            "severity": "high",
+            "category": "leakage",
+            "financialImpact": 96000,
+            "estimatedHours": 20,
+            "recommendedFix": "Add GRNI clearing to the new-store go-live checklist.",
+            "ownerRole": "Supply Chain Controller",
+            "status": "open"
+          },
+          {
+            "rank": 3,
+            "title": "Duplicate vendor records sharing identical bank account",
+            "severity": "medium",
+            "category": "data_quality",
+            "financialImpact": 58000,
+            "estimatedHours": 14,
+            "recommendedFix": "Merge duplicates keyed on bank account; add a uniqueness constraint.",
+            "ownerRole": "AP Lead",
+            "status": "open"
+          },
+          {
+            "rank": 4,
+            "title": "POs to vendors flagged one-time / non-trading",
+            "severity": "medium",
+            "category": "controls",
+            "financialImpact": 40000,
+            "estimatedHours": 12,
+            "recommendedFix": "Block POs to one-time vendors without a buyer override and reason.",
+            "ownerRole": "Procurement",
+            "status": "in_progress"
+          },
+          {
+            "rank": 5,
+            "title": "Obsolete stock above provision at four sites",
+            "severity": "medium",
+            "category": "efficiency",
+            "financialImpact": 36000,
+            "estimatedHours": 10,
+            "recommendedFix": "Write down and tighten ordering at the affected sites.",
+            "ownerRole": "Stock Controller",
+            "status": "open"
+          },
+          {
+            "rank": 6,
+            "title": "Active customers (corporate accounts) with no credit limit",
+            "severity": "low",
+            "category": "data_quality",
+            "financialImpact": 0,
+            "estimatedHours": 6,
+            "recommendedFix": "Set credit limits on corporate/event accounts.",
+            "ownerRole": "Finance Manager",
+            "status": "open"
+          },
+          {
+            "rank": 7,
+            "title": "Large payments to vendors created in the last 90 days (fast-money check)",
+            "severity": "low",
+            "category": "controls",
+            "financialImpact": 0,
+            "estimatedHours": 8,
+            "recommendedFix": "Hold first large payment to new vendors for verification.",
+            "ownerRole": "AP Lead",
+            "status": "open"
+          }
+        ],
+        "uploadSubmittedAt": "2026-06-01",
+        "uploads": [
+          {
+            "fileType": "gl",
+            "fileTypeLabel": "General Ledger",
+            "fileTypeDescription": "GACCENTRY / GACCENTRYD journal lines (all stores)",
+            "filename": "goldcrown_gl_2026.csv",
+            "rows": 412880,
+            "sizeBytes": 92000000,
+            "state": "passed",
+            "submittedAt": "2026-06-03"
+          },
+          {
+            "fileType": "ap",
+            "fileTypeLabel": "Accounts Payable",
+            "fileTypeDescription": "BPSUPPLIER + PINVOICE (food, packaging, royalties)",
+            "filename": "goldcrown_ap_2026.csv",
+            "rows": 64210,
+            "sizeBytes": 18400000,
+            "state": "passed",
+            "submittedAt": "2026-06-03"
+          },
+          {
+            "fileType": "po",
+            "fileTypeLabel": "Purchase / Goods Receipt",
+            "fileTypeDescription": "PORDER + PRECEIPT three-way-match population",
+            "filename": "goldcrown_po_2026.csv",
+            "rows": 88902,
+            "sizeBytes": 24100000,
+            "state": "passed",
+            "submittedAt": "2026-06-03"
+          },
+          {
+            "fileType": "users",
+            "fileTypeLabel": "User & Access",
+            "fileTypeDescription": "AUTILIS store-manager menu × function profiles",
+            "filename": "goldcrown_users_2026.csv",
+            "rows": 642,
+            "sizeBytes": 410000,
+            "state": "passed",
+            "submittedAt": "2026-06-03"
+          },
+          {
+            "fileType": "workflows",
+            "fileTypeLabel": "Workflow & Approvals",
+            "fileTypeDescription": "AWRKHISTO PO approval trail",
+            "filename": "goldcrown_wf_2026.csv",
+            "rows": 29330,
+            "sizeBytes": 4800000,
+            "state": "passed",
+            "submittedAt": "2026-06-03"
+          }
+        ]
+      }
+    ],
+    "engagements": {
+      "2024": {
+        "reportId": "2024",
+        "status": "complete",
+        "submittedAt": "2024-07-08",
+        "improvementHoursPerMonth": 34,
+        "supportHoursPerMonth": 18,
+        "months": 6,
+        "estimatedSavings": 940000,
+        "actualSavings": 802000,
+        "findings": [
+          {
+            "findingRank": 1,
+            "status": "resolved",
+            "estimatedImpact": 320000,
+            "actualImpact": 300000
+          },
+          {
+            "findingRank": 2,
+            "status": "resolved",
+            "estimatedImpact": 188000,
+            "actualImpact": 180000
+          },
+          {
+            "findingRank": 3,
+            "status": "resolved",
+            "estimatedImpact": 142000,
+            "actualImpact": 130000
+          },
+          {
+            "findingRank": 4,
+            "status": "resolved",
+            "estimatedImpact": 96000,
+            "actualImpact": 84000
+          },
+          {
+            "findingRank": 5,
+            "status": "regressed",
+            "estimatedImpact": 78000,
+            "actualImpact": 0
+          },
+          {
+            "findingRank": 6,
+            "status": "resolved",
+            "estimatedImpact": 64000,
+            "actualImpact": 60000
+          },
+          {
+            "findingRank": 7,
+            "status": "resolved",
+            "estimatedImpact": 52000,
+            "actualImpact": 48000
+          },
+          {
+            "findingRank": 8,
+            "status": "resolved",
+            "estimatedImpact": 0,
+            "actualImpact": 0
+          },
+          {
+            "findingRank": 9,
+            "status": "skipped",
+            "estimatedImpact": 46000
+          },
+          {
+            "findingRank": 10,
+            "status": "skipped",
+            "estimatedImpact": 0
+          }
+        ]
+      },
+      "2025": {
+        "reportId": "2025",
+        "status": "complete",
+        "submittedAt": "2025-07-14",
+        "improvementHoursPerMonth": 28,
+        "supportHoursPerMonth": 16,
+        "months": 9,
+        "estimatedSavings": 460000,
+        "actualSavings": 356000,
+        "findings": [
+          {
+            "findingRank": 1,
+            "status": "resolved",
+            "estimatedImpact": 140000,
+            "actualImpact": 132000
+          },
+          {
+            "findingRank": 2,
+            "status": "resolved",
+            "estimatedImpact": 88000,
+            "actualImpact": 82000
+          },
+          {
+            "findingRank": 3,
+            "status": "included",
+            "estimatedImpact": 78000
+          },
+          {
+            "findingRank": 4,
+            "status": "resolved",
+            "estimatedImpact": 60000,
+            "actualImpact": 56000
+          },
+          {
+            "findingRank": 5,
+            "status": "resolved",
+            "estimatedImpact": 44000,
+            "actualImpact": 40000
+          },
+          {
+            "findingRank": 6,
+            "status": "resolved",
+            "estimatedImpact": 50000,
+            "actualImpact": 46000
+          },
+          {
+            "findingRank": 7,
+            "status": "skipped",
+            "estimatedImpact": 0
+          },
+          {
+            "findingRank": 8,
+            "status": "skipped",
+            "estimatedImpact": 0
+          }
+        ]
+      }
+    }
+  }
+]
