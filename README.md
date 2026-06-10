@@ -46,13 +46,13 @@ independent, selected by env literals in `src/adapters/index.ts`:
 | Build | Env | What it is |
 |-------|-----|------------|
 | Offline demo | _(none)_ | mock auth + build-time client registry (the sidebar switcher). No backend. |
-| Staff site (live) | `VITE_ADAPTER=bff` | Microsoft SSO + admin client/invite screen. Needs the backend. |
+| Staff site (live) | `VITE_ADAPTER=bff` | Microsoft SSO + admin client/invite screen. The sidebar switcher and the admin "Clients" list are one roster from the backend. Needs the backend. |
 | Client portal | `VITE_AUTH=client VITE_DATA_ADAPTER=bff` | passwordless magic-link login; per-client data from the backend. Served at `/portal`. |
 
-> **Known limitation:** in the live staff build the sidebar switcher still
-> reads the build-time registry, NOT the admin-created (backend) clients —
-> so clients you create in the admin screen do not appear in the switcher.
-> See [`docs/specs/2026-06-09-staff-client-list-reconciliation.md`](docs/specs/2026-06-09-staff-client-list-reconciliation.md).
+> The sidebar switcher and the admin "Clients" screen read the same backend
+> roster, so a client you create appears in both (reconciled in
+> [`docs/specs/2026-06-09-staff-client-list-reconciliation.md`](docs/specs/2026-06-09-staff-client-list-reconciliation.md)).
+> A client with no audit data loaded yet shows a "No audit data" workspace.
 
 ### Backend (FastAPI) — required for staff admin + client portal
 
@@ -157,17 +157,15 @@ View  →  @/adapters  →  authMock        (offline demo, default)
                      →  authBff         (VITE_ADAPTER=bff — staff Microsoft SSO)
                      →  authClientBff    (VITE_AUTH=client — client magic-link)
 
-                     →  clientsMock      (build-time registry — the demo switcher)
-                     →  clientsBff        (VITE_DATA_ADAPTER=bff — per-client backend data)
+                     →  clientsMock       (offline demo — build-time registry)
+                     →  clientsStaffBff   (VITE_ADAPTER=bff — all admin-created clients, staff)
+                     →  clientsBff        (VITE_DATA_ADAPTER=bff — the client's own data, portal)
 ```
 
 Auth and client-data adapters are selected independently. No view-layer
-rework or router changes when switching modes.
-
-> Note: the `bff` clients adapter currently serves the **client portal**.
-> The **staff** switcher still uses `clientsMock` (the registry), which is
-> why admin-created clients don't appear in it — tracked in
-> [`docs/specs/2026-06-09-staff-client-list-reconciliation.md`](docs/specs/2026-06-09-staff-client-list-reconciliation.md).
+rework or router changes when switching modes. The staff switcher
+(`clientsStaffBff`) and the admin "Clients" screen share one backend roster —
+see [`docs/specs/2026-06-09-staff-client-list-reconciliation.md`](docs/specs/2026-06-09-staff-client-list-reconciliation.md).
 
 ## License
 
