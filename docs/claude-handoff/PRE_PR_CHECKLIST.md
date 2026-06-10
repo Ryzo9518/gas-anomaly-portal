@@ -37,7 +37,7 @@ see `.githooks/pre-commit` — but you remain responsible for the rest.)
 - [ ] Naming respected: `*.route.tsx`, `*Context.tsx`, `use*()`, `PascalCase` types,
       `camelCase` state, `SCREAMING_SNAKE_CASE` constants.
 - [ ] No hardcoded data in routes — data comes from context or fixtures.
-- [ ] `ReportContext` imports from `fixture.active` only.
+- [ ] `ReportContext` reads from `useClient()` (the client registry) — no direct imports from individual client fixture files.
 - [ ] No new brand colors — violet primary, amber historical, emerald success, red risk.
 - [ ] Commit messages follow the `[FEATURE]` format in AGENTS.md §4.
 - [ ] **CI scope respected.** GitHub Actions are allowed for *validation only* (AGENTS.md
