@@ -16,6 +16,11 @@ import { PageStickyHeader } from "@/shell/PageStickyHeader";
 import { useScrollCompact } from "@/lib/useScrollCompact";
 import { useReport } from "@/features/audit/ReportContext";
 import { totalRisks, severeRisks } from "@/features/audit/report-helpers";
+import {
+  FourConversations,
+  RecoveryTimeline,
+  MeasurableProgress,
+} from "@/features/audit/DashboardValueViews";
 
 // ── Formatting helpers ──────────────────────────────────────────────────
 
@@ -364,6 +369,15 @@ export function DashboardRoute() {
           )}
         </div>
       </div>
+
+      {/* ── ONE AUDIT · FOUR CONVERSATIONS ─────────────────────────────── */}
+      <FourConversations />
+
+      {/* ── HOW THE MONEY COMES BACK ───────────────────────────────────── */}
+      <RecoveryTimeline />
+
+      {/* ── MEASURABLE PROGRESS · EVERY CYCLE ──────────────────────────── */}
+      <MeasurableProgress />
 
       {/* ── TOP 5 RISKS CARD ───────────────────────────────────────────── */}
       <Card padding="none">

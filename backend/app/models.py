@@ -175,6 +175,22 @@ class ClientData(Base):
     updated_by: Mapped[str | None] = mapped_column(String(320), nullable=True)
 
 
+def payload_reports(payload) -> list:
+    """Reports array out of a ClientData payload. Accepts the current
+    ``{"reports": [...], "engagements": {...}}`` object and the legacy bare-list
+    form (``[...]``) so old rows keep serving while data is migrated."""
+    if isinstance(payload, dict):
+        return payload.get("reports") or []
+    return payload or []
+
+
+def payload_engagements(payload) -> dict:
+    """Engagements map out of a ClientData payload (``{}`` for legacy rows)."""
+    if isinstance(payload, dict):
+        return payload.get("engagements") or {}
+    return {}
+
+
 class RateLimit(Base):
     __tablename__ = "rate_limit"
 

@@ -1,6 +1,6 @@
 import * as React from "react";
 import { toast } from "sonner";
-import { Plus, RotateCw, Ban, X, Check } from "lucide-react";
+import { Plus, RotateCw, Ban, X, Check, Trash2 } from "lucide-react";
 import { adminApi, type AdminClient } from "@/adapters/bff/admin.bff";
 import { cn } from "@/lib/utils";
 
@@ -60,6 +60,8 @@ export function AdminClients() {
   const [emailInput, setEmailInput] = React.useState("");
   const [confirmRevoke, setConfirmRevoke] = React.useState(false);
   const [confirmContactId, setConfirmContactId] = React.useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = React.useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = React.useState("");
 
   const refresh = React.useCallback(async () => {
     try {
@@ -150,6 +152,21 @@ export function AdminClients() {
     }
   }
 
+  async function deleteClient() {
+    if (!selected) return;
+    const name = selected.name;
+    try {
+      await adminApi.deleteClient(selected.id);
+      setConfirmDelete(false);
+      setDeleteConfirmText("");
+      setSelectedId(null);
+      await refresh();
+      toast.success(`${name} and all its data deleted`);
+    } catch {
+      toast.error("Delete failed");
+    }
+  }
+
   if (error)
     return <p className="p-8 text-slate-500">Couldn't load clients. Refresh to retry.</p>;
   if (!clients)
@@ -229,14 +246,25 @@ export function AdminClients() {
           <>
             <div className="mb-4 flex items-center justify-between">
               <h1 className="text-[18px] font-semibold text-slate-900">{selected.name}</h1>
-              {!selected.revoked && (
+              <div className="flex items-center gap-2">
+                {!selected.revoked && (
+                  <button
+                    onClick={() => setConfirmRevoke(true)}
+                    className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[12px] text-rose-600 ring-1 ring-rose-200 hover:bg-rose-50"
+                  >
+                    <Ban className="h-3.5 w-3.5" /> Revoke whole client
+                  </button>
+                )}
                 <button
-                  onClick={() => setConfirmRevoke(true)}
-                  className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[12px] text-rose-600 ring-1 ring-rose-200 hover:bg-rose-50"
+                  onClick={() => {
+                    setDeleteConfirmText("");
+                    setConfirmDelete(true);
+                  }}
+                  className="flex items-center gap-1.5 rounded-lg bg-rose-600 px-2.5 py-1.5 text-[12px] font-medium text-white hover:bg-rose-500"
                 >
-                  <Ban className="h-3.5 w-3.5" /> Revoke whole client
+                  <Trash2 className="h-3.5 w-3.5" /> Delete company + data
                 </button>
-              )}
+              </div>
             </div>
 
             {/* Invite form */}
@@ -374,6 +402,46 @@ export function AdminClients() {
                 className="rounded-lg bg-rose-600 px-3 py-1.5 text-[13px] font-medium text-white hover:bg-rose-500"
               >
                 Revoke client
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Hard-delete confirm — irreversible, so require typing the exact name */}
+      {confirmDelete && selected && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-slate-900/40 p-4">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl ring-1 ring-slate-200">
+            <h3 className="text-[16px] font-semibold text-slate-900">
+              Delete {selected.name}?
+            </h3>
+            <p className="mt-2 text-[13px] text-slate-500">
+              This permanently deletes the company and <strong>all of its data</strong> —
+              audit reports, contacts and sessions. This cannot be undone. Type{" "}
+              <span className="font-mono text-slate-700">{selected.name}</span> to confirm.
+            </p>
+            <input
+              value={deleteConfirmText}
+              onChange={(e) => setDeleteConfirmText(e.target.value)}
+              placeholder={selected.name}
+              className="mt-3 h-9 w-full rounded-lg bg-white px-2.5 text-[13px] text-slate-900 ring-1 ring-slate-200 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-500"
+            />
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                onClick={() => {
+                  setConfirmDelete(false);
+                  setDeleteConfirmText("");
+                }}
+                className="rounded-lg px-3 py-1.5 text-[13px] text-slate-600 hover:bg-slate-100"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={deleteClient}
+                disabled={deleteConfirmText.trim() !== selected.name}
+                className="rounded-lg bg-rose-600 px-3 py-1.5 text-[13px] font-medium text-white hover:bg-rose-500 disabled:opacity-50"
+              >
+                Delete permanently
               </button>
             </div>
           </div>
