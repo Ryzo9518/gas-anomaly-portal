@@ -143,15 +143,23 @@ src/
 ├── App.tsx                           [ROOT — at src/App.tsx, NOT src/app/App.tsx]
 ├── features/audit/
 │   ├── reports.fixture.ts            [DATA MODEL + SEED — single source]
-│   ├── ReportContext.tsx             [STATE MANAGEMENT]
+│   ├── ReportContext.tsx             [STATE MANAGEMENT — reads from useClient()]
+│   ├── report-helpers.ts             [CLIENT-AGNOSTIC MATH — priorReportOf, computeCumulative]
 │   └── audit.fixture.ts              [COMPAT SHIM — re-exports only]
+├── features/clients/
+│   ├── clients.data.ts               [CLIENT REGISTRY + VITE_CLIENT SCOPING]
+│   └── ClientContext.tsx             [CLIENT SELECTION — URL-driven, mirrors ReportContext]
 ├── features/login/                   [LOGIN UI — Hero, LoginCard, MobileHero]
-├── adapters/index.ts                 [AUTH ADAPTER SEAM — only public surface]
-├── adapters/mock/auth.mock.ts        [PHASE 1 MOCK AUTH]
-├── ports/auth.port.ts                [AuthPort INTERFACE]
+├── adapters/index.ts                 [ADAPTER SEAM — VITE_ADAPTER selects mock|bff]
+├── adapters/mock/auth.mock.ts        [MOCK AUTH — open session or VITE_CLIENT_PASSCODE gate]
+├── adapters/mock/clients.mock.ts     [MOCK CLIENTS — reads client registry]
+├── adapters/bff/auth.bff.ts          [BFF AUTH — Microsoft SSO via /api/auth/*]
+├── ports/auth.port.ts                [AuthPort INTERFACE — signIn/signOut/getSession/startMicrosoftLogin]
+├── ports/clients.port.ts             [ClientsPort INTERFACE — Phase-2 seam]
 ├── state/                            [authStore, uiStore, query]
 ├── routes/
-│   ├── login.route.tsx               [/login — mock auth]
+│   ├── login.route.tsx               [/login — mock auth or Microsoft button]
+│   ├── authCallback.route.tsx        [/auth/callback — session restore after SSO]
 │   ├── dashboard.route.tsx           [KPI CARDS]
 │   ├── findings.route.tsx            [TABLE + PLAN COLUMN]
 │   ├── engagement.route.tsx          [BUILDER + LOCKED VIEW]
@@ -159,6 +167,7 @@ src/
 │   └── upload.route.tsx              [ARCHIVE VIEW + NEW-CYCLE INTAKE]
 └── shell/
     ├── TopBar.tsx                    [REPORT SELECTOR + BANNER]
+    ├── ClientSwitcher.tsx            [CLIENT SWITCHER — sidebar, internal builds only]
     └── Sidebar, AppLayout, MobileNav, CommandBar, ... (see FILE_STRUCTURE)
 ```
 

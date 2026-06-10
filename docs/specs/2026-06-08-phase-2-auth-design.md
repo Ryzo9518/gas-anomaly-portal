@@ -1,6 +1,6 @@
 # Phase 2 Auth Design — Staff M365 SSO + Client Magic Link
 
-**Status:** Draft spec for review (JP). Not yet implemented.
+**Status:** Staff SSO implemented (merged PR #5 + PR #6, 2026-06-08). Client magic-link deferred to next phase.
 **Author:** Ryan (with Claude), 2026-06-08
 **Base commit:** `7788b1b`
 **Scope:** Real authentication for `anomaly.gasecosys.co.za`, replacing the Phase 1 mock (`src/adapters/mock/auth.mock.ts`, open session).

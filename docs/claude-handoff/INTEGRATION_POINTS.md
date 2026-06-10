@@ -47,32 +47,36 @@ import `reports.fixture*` data directly.
 ### Current implementation
 
 ```
-/login route → LoginCard → authAdapter.login()
+/login route → LoginCard → auth.signIn() / auth.startMicrosoftLogin()
                                 ↓
-                   src/adapters/index.ts       (public surface)
+                   src/adapters/index.ts       (public surface — VITE_ADAPTER selects mock|bff)
                                 ↓
-                   src/adapters/mock/auth.mock.ts  (Phase 1 mock)
+                   src/adapters/mock/auth.mock.ts  (Phase 1 / client passcode builds)
+                   src/adapters/bff/auth.bff.ts    (staff Microsoft SSO — VITE_ADAPTER=bff)
                                 ↓
                    src/state/authStore.ts       (Zustand — holds session)
 ```
 
 ### AuthPort interface (`src/ports/auth.port.ts`)
 
+> **Note:** `INTEGRATION_POINTS.md` was previously out of date here. The actual interface (and the canonical
+> reference) is `src/ports/auth.port.ts`. The old `login()/AuthResult` names never existed in code.
+
 ```typescript
 interface AuthPort {
-  login(credentials: { email: string; password: string }): Promise<AuthResult>;
-  logout(): Promise<void>;
   getSession(): Promise<Session | null>;
+  signIn(credentials: { email: string; password: string }): Promise<Session>;
+  signOut(): Promise<void>;
+  startMicrosoftLogin(): void;  // Staff door — no-op under the mock adapter
 }
 ```
 
-### Switching to a real backend (Phase 2)
+### Auth adapters (as of 2026-06-08)
 
-1. Create `src/adapters/bff/auth.bff.ts` implementing `AuthPort`
-2. Set `CURRENT_ADAPTER = authBff` in `src/adapters/index.ts` (or use `VITE_ADAPTER=bff` env var)
-3. Uncomment the proxy entry in `vite.config.ts`
+- **`mock`** (default, `VITE_ADAPTER` unset): open session for dev; if `VITE_CLIENT_PASSCODE` is set, `getSession()` returns null and `signIn()` requires the passcode. Used for internal dev and per-client scoped builds.
+- **`bff`** (`VITE_ADAPTER=bff`): talks to the FastAPI backend at `/api/*`. `startMicrosoftLogin()` redirects to `/api/auth/microsoft/start`. Session is an HttpOnly cookie set by the backend. Used for the live staff build.
 
-No view file, route file, or hook needs to change. The adapter seam is the only boundary.
+Phase 2 remaining work: client magic-link (`requestMagicLink` / `completeMagicLink`) — see `docs/specs/2026-06-08-phase-2-auth-design.md`.
 
 ---
 
