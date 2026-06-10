@@ -68,6 +68,13 @@ const ENG_PILL: Record<string, { label: string; cls: string }> = {
   complete:  { label: "Engagement complete",   cls: "bg-emerald-50 text-emerald-700 ring-emerald-100" },
 };
 
+// TEMP (2026-06-10): the executive "value views" (Four Conversations, Recovery
+// Timeline, Measurable Progress) are hidden for today's session at Ryan's
+// request — not needed today. To RESTORE: set this back to `true` (or revert the
+// commit that introduced this flag). Everything else on the dashboard is
+// unchanged.
+const SHOW_VALUE_VIEWS = false;
+
 // ────────────────────────────────────────────────────────────────────────
 
 export function DashboardRoute() {
@@ -370,14 +377,19 @@ export function DashboardRoute() {
         </div>
       </div>
 
-      {/* ── ONE AUDIT · FOUR CONVERSATIONS ─────────────────────────────── */}
-      <FourConversations />
+      {/* ── EXECUTIVE VALUE VIEWS (temporarily hidden — see SHOW_VALUE_VIEWS) ─ */}
+      {SHOW_VALUE_VIEWS && (
+        <>
+          {/* ── ONE AUDIT · FOUR CONVERSATIONS ───────────────────────────── */}
+          <FourConversations />
 
-      {/* ── HOW THE MONEY COMES BACK ───────────────────────────────────── */}
-      <RecoveryTimeline />
+          {/* ── HOW THE MONEY COMES BACK ─────────────────────────────────── */}
+          <RecoveryTimeline />
 
-      {/* ── MEASURABLE PROGRESS · EVERY CYCLE ──────────────────────────── */}
-      <MeasurableProgress />
+          {/* ── MEASURABLE PROGRESS · EVERY CYCLE ────────────────────────── */}
+          <MeasurableProgress />
+        </>
+      )}
 
       {/* ── TOP 5 RISKS CARD ───────────────────────────────────────────── */}
       <Card padding="none">
