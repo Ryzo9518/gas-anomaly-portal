@@ -5,6 +5,7 @@ import {
   ChevronDown, Check, History,
 } from "lucide-react";
 import { useReport } from "@/features/audit/ReportContext";
+import { ClientSwitcher } from "./ClientSwitcher";
 import type { EngagementStatus } from "@/features/audit/reports.fixture";
 import { useUIStore } from "@/state/uiStore";
 import { IconButton } from "@/ui/Button";
@@ -128,7 +129,7 @@ export function TopBar() {
   const navigate    = useNavigate();
   const setCommandOpen   = useUIStore((s) => s.setCommandOpen);
   const setMobileNavOpen = useUIStore((s) => s.setMobileNavOpen);
-  const { isHistorical, selectedReport, engagement, linkWithReport } = useReport();
+  const { isHistorical, selectedReport, engagement, linkWithReport, hasReports } = useReport();
 
   // Show recovered vs planned in the historical bar when the engagement is complete.
   const savingsNote = (() => {
@@ -205,9 +206,18 @@ export function TopBar() {
               </strong>
             </div>
           ) : (
-            /* ── [Report ▾] › section ── */
+            /* ── [Client ▾] › [Report ▾] › section ── */
             <div className="flex items-center gap-1.5 min-w-0">
-              <ReportSelector />
+              <ClientSwitcher />
+              {hasReports && (
+                <>
+                  <ChevronRight
+                    className="hidden md:block h-3 w-3 text-slate-300 shrink-0"
+                    aria-hidden="true"
+                  />
+                  <ReportSelector />
+                </>
+              )}
               <ChevronRight
                 className="hidden md:block h-3 w-3 text-slate-300 shrink-0"
                 aria-hidden="true"

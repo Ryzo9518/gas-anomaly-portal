@@ -1,7 +1,7 @@
 # Spec: Reconcile the Staff Client List (switcher ↔ admin-created clients)
 
 **Date:** 2026-06-09
-**Status:** Proposed — remediation for a live staff-UX defect
+**Status:** Implemented (PR #16, 2026-06-09) — Option A shipped; acceptance criteria (§4) met. The §5 security items remain open for JP.
 **For:** JP (implementation)
 **Origin:** Multi-agent doc review of `docs/plans/2026-06-08-client-invite-access.md` (2026-06-09), triggered by an Ops-Director report that staff cannot differentiate or select clients in the portal.
 **Applies to:** GAS Anomaly Portal (`anomaly.gasecosys.co.za`), staff build.
@@ -75,21 +75,22 @@ This does **not** fix the disconnect — it just makes it legible. Option A is t
 
 ## 4. Acceptance criteria (Option A)
 
-- [ ] A client created in the "Clients" admin screen appears in the sidebar switcher.
-- [ ] Selecting that client in either control selects the same client (one roster, one ID).
-- [ ] Selecting a created-but-no-data client shows a clear empty state, not an error or another client's data.
-- [ ] `client_id` is a single type (UUID string) across `authStore`, the clients port, the `?client=` URL param, and the backend.
-- [ ] The offline demo build still works without a backend (registry behind an explicit demo flag).
-- [ ] Client-portal isolation is unaffected (no regression to the Unit 6/12 isolation guarantee).
+- [x] A client created in the "Clients" admin screen appears in the sidebar switcher.
+- [x] Selecting that client in either control selects the same client (one roster, one ID).
+- [x] Selecting a created-but-no-data client shows a clear empty state, not an error or another client's data.
+- [x] `client_id` is a single type (UUID string) across `authStore`, the clients port, the `?client=` URL param, and the backend.
+- [x] The offline demo build still works without a backend (registry behind an explicit demo flag).
+- [x] Client-portal isolation is unaffected (no regression to the Unit 6/12 isolation guarantee).
 
 ## 5. Out of scope here (tracked separately)
 
 These came out of the same review and are **not** part of this reconciliation, but are recorded so they aren't lost:
 
-**Design polish (staff "Clients" screen)** — the component self-flags `// FLAGGED for a visual pass ... design review AI-slop note`:
-- Stronger selected-state; show a differentiator per client (contact count / status dot), not name-only.
-- Reject duplicate client names on create (free-text names collide).
-- Single-contact revoke should confirm (plan said "inline confirm pair"; code revokes immediately).
+**Design polish (staff "Clients" screen)** — DONE in PR #16 (resolved the `// FLAGGED for a visual pass ... AI-slop note`):
+- [x] Re-themed dark→light to match the app shell (was dark-on-light).
+- [x] Stronger selected-state; per-client status dot + summary ("1 active, 1 pending" / "No contacts yet"), not name-only.
+- [x] Reject duplicate client names on create.
+- [x] Single-contact revoke now shows an inline confirm before revoking.
 
 **Security (for JP)** — genuine plan-level gaps from the review:
 - Staff-admin JWT is not revocable: removal from `admin_emails` still grants admin for up to `session_ttl_hours` (10h). No server-side staff-session revocation.
