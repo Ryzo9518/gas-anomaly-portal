@@ -11,6 +11,10 @@ export function ClientSwitcher({ collapsed }: { collapsed: boolean }) {
   const { clients, selectedClient, selectClient } = useClient();
   const [open, setOpen] = React.useState(false);
 
+  // Empty roster (fresh deploy / all revoked) → no client to show; hide entirely.
+  // The sidebar nav still leads to the Clients screen to create the first one.
+  if (clients.length === 0) return null;
+
   // Single-client (scoped) build → static label, no interactivity.
   if (clients.length <= 1) {
     if (collapsed) return null;

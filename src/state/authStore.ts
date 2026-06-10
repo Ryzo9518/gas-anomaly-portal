@@ -26,6 +26,7 @@ export interface AuthActor {
   userId: string;
   displayName: string;
   userName: string;
+  isAdmin?: boolean;
 }
 
 // Patch shape used by setSession(). Each field is optional so the bff
@@ -36,7 +37,7 @@ export interface AuthActor {
 export interface SessionPatch {
   jwt?: string | null;
   expiresAt?: number | null;
-  client_id?: number | null;
+  client_id?: string | null;
   actor?: AuthActor | null;
   isOpenSession?: boolean;
 }
@@ -44,7 +45,9 @@ export interface SessionPatch {
 interface AuthState {
   jwt: string | null;
   expiresAt: number | null;     // epoch ms; null when no JWT issued
-  client_id: number | null;     // resolved from JWT claims, server-side
+  client_id: string | null;     // canonical client UUID (string) — matches the
+                                // backend + the clients port; resolved from the
+                                // session, server-side
   actor: AuthActor | null;
   isOpenSession: boolean;        // mirrors Session.isOpenSession
 
@@ -64,6 +67,7 @@ function actorFromSession(s: Session): AuthActor {
     userId: s.userId,
     displayName: s.displayName,
     userName: s.userName,
+    isAdmin: s.isAdmin,
   };
 }
 

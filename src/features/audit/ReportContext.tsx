@@ -2,7 +2,8 @@ import * as React from "react";
 import { useSearchParams, useLocation } from "react-router-dom";
 import { useClient } from "@/features/clients/ClientContext";
 import { priorReportOf, computeCumulative } from "@/features/audit/report-helpers";
-import type { ClientInfo } from "@/features/clients/clients.data";
+import { EMPTY_REPORT } from "@/features/audit/reports.fixture";
+import type { ClientInfo } from "@/features/clients/clients.types";
 import type {
   AuditReport,
   AuditUploadFile,
@@ -37,6 +38,7 @@ interface ReportContextValue {
   selectedReport: AuditReport;
   selectedReportId: string;
   selectReport: (id: string) => void;
+  hasReports: boolean;             // false when the client has no audit data loaded yet
 
   priorReport: AuditReport | null; // chronological predecessor (null at baseline)
   priorEngagement: Engagement | null; // the prior cycle's plan (for carry-over)
@@ -126,8 +128,12 @@ export function ReportProvider({ children }: { children: React.ReactNode }) {
     }
   }, [location.pathname, urlReportId, selectedReportId, searchParams, setSearchParams]);
 
+  const hasReports = REPORTS.length > 0;
+  // EMPTY_REPORT keeps the context (and the shell that reads it) crash-safe when
+  // a client has no audit data yet. Audit screens are gated behind `hasReports`
+  // and show an empty state, so this sentinel never reaches a user.
   const selectedReport =
-    REPORTS.find((r) => r.id === selectedReportId) ?? REPORTS_DESC[0];
+    REPORTS.find((r) => r.id === selectedReportId) ?? REPORTS_DESC[0] ?? EMPTY_REPORT;
 
   const selectReport = React.useCallback(
     (id: string) => {
@@ -228,6 +234,7 @@ export function ReportProvider({ children }: { children: React.ReactNode }) {
     selectedReport,
     selectedReportId,
     selectReport,
+    hasReports,
     priorReport,
     priorEngagement,
     isBaseline: priorReport === null,

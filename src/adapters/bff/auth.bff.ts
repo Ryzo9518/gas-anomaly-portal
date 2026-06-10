@@ -13,6 +13,7 @@ async function getSession(): Promise<Session | null> {
     userId: data.userId,
     displayName: data.displayName,
     userName: data.userName,
+    isAdmin: !!data.isAdmin,
   };
 }
 

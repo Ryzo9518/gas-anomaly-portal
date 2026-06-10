@@ -12,25 +12,18 @@
 import type { AuditReport, Engagement } from "@/features/audit/reports.fixture";
 import * as tourvestData from "@/features/audit/reports.fixture";
 import * as newClientData from "@/features/audit/reports.fixture.clean";
+import * as lojafData from "@/features/audit/reports.fixture.lojaf";
+import * as assetMgmtData from "@/features/audit/reports.fixture.assetmgmt";
+import * as kfcData from "@/features/audit/reports.fixture.kfc";
+// Types live in clients.types.ts (no fixture data) so view code can import them
+// without dragging this fixture-bearing module into a client-portal bundle.
+import type {
+  ClientEntry,
+  ClientInfo,
+  ClientSummary,
+} from "@/features/clients/clients.types";
 
-export interface ClientInfo {
-  name: string;
-  healthTarget: number;
-}
-
-export interface ClientEntry {
-  id: string; // URL slug
-  info: ClientInfo;
-  reports: AuditReport[]; // as authored (oldest → newest)
-  reportsDesc: AuditReport[]; // newest first
-  latestReportId: string;
-  seedEngagements: Record<string, Engagement>;
-}
-
-export interface ClientSummary {
-  id: string;
-  name: string;
-}
+export type { ClientEntry, ClientInfo, ClientSummary };
 
 interface FixtureModule {
   CLIENT_INFO: ClientInfo;
@@ -55,12 +48,27 @@ export const DEFAULT_CLIENT_ID = "tourvest";
 
 const SCOPE = (import.meta.env.VITE_CLIENT as string | undefined) ?? "all";
 
+// Showcase switcher = the four demo clients (Tourvest, LOJAF, Asset Management,
+// KFC). `newclient` remains reachable only as a scoped per-client build
+// (VITE_CLIENT=newclient) — it is the empty-state onboarding fixture, not a
+// value demo, so it is intentionally excluded from the default "all" set.
 export const CLIENTS: ClientEntry[] =
   SCOPE === "tourvest"
     ? [toEntry("tourvest", tourvestData)]
     : SCOPE === "newclient"
       ? [toEntry("newclient", newClientData)]
-      : [toEntry("tourvest", tourvestData), toEntry("newclient", newClientData)];
+      : SCOPE === "lojaf"
+        ? [toEntry("lojaf", lojafData)]
+        : SCOPE === "assetmgmt"
+          ? [toEntry("assetmgmt", assetMgmtData)]
+          : SCOPE === "kfc"
+            ? [toEntry("kfc", kfcData)]
+            : [
+                toEntry("tourvest", tourvestData),
+                toEntry("lojaf", lojafData),
+                toEntry("assetmgmt", assetMgmtData),
+                toEntry("kfc", kfcData),
+              ];
 
 export const CLIENT_SUMMARIES: ClientSummary[] = CLIENTS.map((c) => ({
   id: c.id,

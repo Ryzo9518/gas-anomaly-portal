@@ -104,6 +104,26 @@ export interface AuditReport {
   uploads: AuditUploadFile[];      // the five Sage X3 exports for this cycle
 }
 
+// Zero-value sentinel for a client that has NO audit reports yet (a just-created
+// client before its data is loaded). ReportContext substitutes this so the app
+// never crashes dereferencing a missing report; screens that would show it are
+// gated behind `hasReports` and render an empty state instead. Compile-checked
+// against AuditReport, so a shape change here surfaces immediately.
+export const EMPTY_REPORT: AuditReport = {
+  id: "",
+  shortLabel: "",
+  cycleLabel: "",
+  status: "awaiting_data",
+  completedAt: "",
+  healthScore: 0,
+  leakageEstimate: 0,
+  leakageRecoverable: 0,
+  risks: { critical: 0, high: 0, medium: 0, low: 0 },
+  findings: [],
+  uploadSubmittedAt: "",
+  uploads: [],
+};
+
 export interface CumulativeSummary {
   cyclesCompleted: number;
   totalRecovered: number;          // sum of actualSavings across complete engagements

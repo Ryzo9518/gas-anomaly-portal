@@ -68,6 +68,16 @@ cumulative KPI stays live, plan column toggles, URL shareability).
 
 `5199` is the project's standing dev/preview port (see `.claude/launch.json`).
 
+**Two-layer enforcement.** Gates 1–2 are enforced *locally* by a pre-commit hook
+(`.githooks/pre-commit`, wired by `npm run prepare` via `git config core.hooksPath`;
+a clone activates it on first `npm install`, no manual step) **and** *server-side* by
+the Quality Gates CI workflow in §4, which is the un-skippable backstop on every pull
+request. Local fails fast; CI catches anything committed with `--no-verify` or pushed
+from an unconfigured clone. Gate 3 (manual visual check) cannot be machine-checked and
+remains the committer's responsibility — see the one-screen
+`docs/claude-handoff/PRE_PR_CHECKLIST.md` (mirrored into every PR by
+`.github/pull_request_template.md`).
+
 ---
 
 ## 4. Conventions (binding)
@@ -91,9 +101,21 @@ cumulative KPI stays live, plan column toggles, URL shareability).
   - Why it changed
   - Related lesson: [LESSON-N]   (if applicable)
   ```
-- **CI policy — GitHub Actions are NOT used (standing rule).** Quality gates run
-  locally before commit. Do not add `.github/workflows/` without an explicit,
-  recorded decision to amend this law.
+- **CI policy — GitHub Actions ARE used, for validation only (amended 2026-06-09
+  by recorded decision of the repository owner).** This supersedes the former
+  no-Actions rule. The quality-gates workflow (`.github/workflows/quality-gates.yml`)
+  runs Gates 1–2 plus unit tests and the client-isolation check on every pull request
+  to `main` and every push to `main`. It is the server-side backstop to the local
+  pre-commit hook in §3. Binding limits on CI:
+  1. **CI validates — it must never deploy.** No workflow may push to the Hetzner
+     server, hold deploy credentials, or promote a build. Deployment stays the manual
+     runbook process (§6).
+  2. **CI complements, does not replace, local gates.** The pre-commit hook (§3) stays;
+     both run the same gates.
+  3. **New workflow scope beyond validation** (deploy, secrets, releases, anything that
+     writes outside the PR) still requires a fresh recorded decision to amend this section.
+  - The PR template (`.github/pull_request_template.md`) is a static description, not a
+    workflow, and carries no CI cost.
 
 ---
 
@@ -120,8 +142,9 @@ The live build on Hetzner MUST comply with this law. The full runbook is in
 3. **Serve the built `dist/` as a static SPA with an `index.html` fallback**
    (`try_files $uri $uri/ /index.html;`). This app is client-side routed;
    without the fallback, deep links and refreshes 404.
-4. **No GitHub Actions / cloud CI** drives the deploy (per §4). Deployment is the
-   documented manual/scripted process in the runbook.
+4. **CI validates but never deploys (per §4).** GitHub Actions run the quality gates
+   on pull requests and on `main`, but no workflow drives the Hetzner deploy. Deployment
+   stays the documented manual/scripted runbook process.
 5. **HTTPS only** at `anomaly.gasecosys.co.za`, with HTTP redirected to HTTPS.
 6. **The fixture mode is an explicit, recorded build-time choice** (`demo` vs
    `clean`) — never left ambiguous. See the runbook.

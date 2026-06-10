@@ -6,6 +6,8 @@ After=network.target
 Type=simple
 WorkingDirectory=/opt/gas-portal/backend
 EnvironmentFile=/etc/gas-portal/api.env
+# Apply DB migrations before starting (idempotent; no-op when already at head).
+ExecStartPre=/opt/gas-portal/backend/.venv/bin/alembic upgrade head
 ExecStart=/opt/gas-portal/backend/.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8001
 Restart=on-failure
 RestartSec=3

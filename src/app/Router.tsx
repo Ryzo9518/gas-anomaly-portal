@@ -2,15 +2,20 @@ import * as React from "react";
 import { Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { AppLayout } from "@/shell/AppLayout";
 import { useAuthStore } from "@/state/authStore";
+import { ClientProvider, useClient } from "@/features/clients/ClientContext";
+import { ReportProvider } from "@/features/audit/ReportContext";
 
 import { DashboardRoute } from "@/routes/dashboard.route";
 import { LoginRoute } from "@/routes/login.route";
+import { ClientLogin } from "@/features/login/ClientLogin";
 import { AuthCallbackRoute } from "@/routes/authCallback.route";
+import { ClientVerifyRoute } from "@/routes/clientVerify.route";
 import { UploadRoute } from "@/routes/upload.route";
 import { ReportRoute } from "@/routes/report.route";
 import { FindingsRoute } from "@/routes/findings.route";
 import { FindingDetailRoute } from "@/routes/findingDetail.route";
 import { EngagementRoute } from "@/routes/engagement.route";
+import { AdminClientsRoute } from "@/routes/admin.clients.route";
 
 // V1 audit portal routes — full clickable set landed.
 // Routable:  /login · /dashboard · /upload · /report · /findings · /findings/:rank · /engagement
@@ -24,20 +29,77 @@ function RequireAuth() {
   return <Outlet />;
 }
 
+// Admin-only gate (R1). Non-admins are redirected to the dashboard with no
+// error surface — the absence of the admin nav is the only signal (a 403 page
+// would advertise the route). The backend independently enforces admin access
+// on every admin API route; this is UI gating only. Used by the Unit 9 admin
+// route.
+export function RequireAdmin() {
+  const actor = useAuthStore((s) => s.actor);
+  if (!actor) {
+    return <Navigate to="/login" replace />;
+  }
+  if (!actor.isAdmin) {
+    return <Navigate to="/dashboard" replace />;
+  }
+  return <Outlet />;
+}
+
+// Data providers for the AUTHENTICATED app only. Wrapping here (not app-wide)
+// means public routes (login, magic-link verify) render WITHOUT an authenticated
+// client-data fetch — otherwise a logged-out client hitting /portal would 401
+// and see "unable to load portal" instead of the login screen.
+// ReportProvider is re-keyed by client so engagement/report state resets per
+// client (no cross-client bleed).
+function AuthedDataProviders() {
+  const { selectedClientId } = useClient();
+  return (
+    <ReportProvider key={selectedClientId}>
+      <Outlet />
+    </ReportProvider>
+  );
+}
+
+function AuthedShell() {
+  return (
+    <ClientProvider>
+      <AuthedDataProviders />
+    </ClientProvider>
+  );
+}
+
+// Client-portal build (VITE_AUTH=client) uses the passwordless client login;
+// otherwise the staff Microsoft login. Build-time literal so the unused login
+// surface tree-shakes out.
+const IS_CLIENT_PORTAL = import.meta.env.VITE_AUTH === "client";
+
 export function Router() {
   return (
     <Routes>
-      <Route path="/login" element={<LoginRoute />} />
+      <Route
+        path="/login"
+        element={IS_CLIENT_PORTAL ? <ClientLogin /> : <LoginRoute />}
+      />
       <Route path="/auth/callback" element={<AuthCallbackRoute />} />
+      <Route path="/auth/verify" element={<ClientVerifyRoute />} />
       <Route element={<RequireAuth />}>
-        <Route element={<AppLayout />}>
-          <Route index element={<Navigate to="/dashboard" replace />} />
-          <Route path="/dashboard" element={<DashboardRoute />} />
-          <Route path="/upload" element={<UploadRoute />} />
-          <Route path="/report" element={<ReportRoute />} />
-          <Route path="/findings" element={<FindingsRoute />} />
-          <Route path="/findings/:rank" element={<FindingDetailRoute />} />
-          <Route path="/engagement" element={<EngagementRoute />} />
+        <Route element={<AuthedShell />}>
+          <Route element={<AppLayout />}>
+            <Route index element={<Navigate to="/dashboard" replace />} />
+            <Route path="/dashboard" element={<DashboardRoute />} />
+            <Route path="/upload" element={<UploadRoute />} />
+            <Route path="/report" element={<ReportRoute />} />
+            <Route path="/findings" element={<FindingsRoute />} />
+            <Route path="/findings/:rank" element={<FindingDetailRoute />} />
+            <Route path="/engagement" element={<EngagementRoute />} />
+          </Route>
+        </Route>
+      </Route>
+      <Route element={<RequireAdmin />}>
+        <Route element={<AuthedShell />}>
+          <Route element={<AppLayout />}>
+            <Route path="/admin/clients" element={<AdminClientsRoute />} />
+          </Route>
         </Route>
       </Route>
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
